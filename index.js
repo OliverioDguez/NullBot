@@ -209,7 +209,43 @@ client.on(Events.MessageCreate, async (message) => {
         message.reply("There was an error trying to prune messages.");
       }
       break;
+    case "serverinfo":
+    case "server":
+      const guild = message.guild;
+      const owner = await guild.fetchOwner();
 
+      const serverEmbed = new EmbedBuilder()
+        .setColor("Random")
+        .setTitle("Server Information")
+        .setThumbnail(guild.iconURL({ dynamic: true }))
+        .addFields(
+          { name: "Server Name", value: `${guild.name}`, inline: true },
+          { name: "Server ID", value: `${guild.id}`, inline: true },
+          { name: "Server Owner", value: `${owner.user.tag}`, inline: true },
+
+          {
+            name: "Server Member Count",
+            value: `${guild.memberCount}`,
+            inline: true,
+          },
+
+          {
+            name: "Server Created At",
+            value: `${guild.createdAt.toLocaleString()}`,
+            inline: true,
+          },
+          { name: "Locale", value: `${guild.preferredLocale}`, inline: true },
+
+          { name: "Roles", value: `${guild.roles.cache.size}`, inline: true }
+        )
+        .setImage(guild.bannerURL({ size: 1024 }))
+        .setFooter({
+          text: `Sentinel • Requested by ${message.author.username}`,
+        })
+        .setTimestamp();
+
+      message.reply({ embeds: [serverEmbed] });
+      break;
     default:
       // Empty default to avoid spamming "Invalid command"
       break;
