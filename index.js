@@ -24,6 +24,9 @@ const client = new Client({
   ],
 });
 
+// Modules
+const pingCommand = require("./commands/ping.js");
+
 // --- EVENT: CLIENT READY ---
 client.once(Events.ClientReady, (c) => {
   console.log(`✅ Ready! Logged in as ${c.user.tag}`);
@@ -48,7 +51,7 @@ client.on(Events.MessageCreate, async (message) => {
 
   switch (command) {
     case "ping":
-      message.reply(`¡Pong! ${client.ws.ping} ms`);
+      pingCommand.execute(message, args);
       break;
 
     case "name":
