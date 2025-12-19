@@ -30,6 +30,7 @@ const nameCommand = require("./commands/name.js");
 const avatarCommand = require("./commands/avatar.js");
 const eightBallCommand = require("./commands/8ball.js");
 const pokedexCommand = require("./commands/pokedex.js");
+const coinCommand = require("./commands/coin.js");
 
 // --- EVENT: CLIENT READY ---
 client.once(Events.ClientReady, (c) => {
@@ -77,9 +78,7 @@ client.on(Events.MessageCreate, async (message) => {
 
     case "coin":
     case "flip":
-      const sides = ["Heads", "Tails"];
-      const winningSide = sides[Math.floor(Math.random() * sides.length)];
-      message.reply(`The coin landed on ${winningSide}`);
+      coinCommand.execute(message, args);
       break;
 
     case "clear":
