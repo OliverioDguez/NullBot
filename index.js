@@ -77,7 +77,6 @@ client.on(Events.MessageCreate, async (message) => {
     }
 
     case "coin":
-    case "flip":
       coinCommand.execute(message, args);
       break;
 
