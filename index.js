@@ -28,6 +28,7 @@ const client = new Client({
 const pingCommand = require("./commands/ping.js");
 const nameCommand = require("./commands/name.js");
 const avatarCommand = require("./commands/avatar.js");
+const eightBallCommand = require("./commands/8ball.js");
 
 // --- EVENT: CLIENT READY ---
 client.once(Events.ClientReady, (c) => {
@@ -65,25 +66,10 @@ client.on(Events.MessageCreate, async (message) => {
       break;
 
     case "8ball":
-      if (args.length === 0) {
-        message.reply("Please provide a question");
-        break;
-      }
-      const box = [
-        "Yes",
-        "No",
-        "Maybe",
-        "Ask again",
-        "I don't know",
-        "That's for sure",
-        "Never",
-        "Always",
-      ];
-      const index = Math.floor(Math.random() * box.length);
-      message.reply(box[index]);
+      eightBallCommand.execute(message, args);
       break;
 
-    case "gif":
+    case "gif": {
       if (args.length === 0) {
         message.reply("Please provide a search term");
         break;
@@ -106,8 +92,9 @@ client.on(Events.MessageCreate, async (message) => {
         message.reply("An error occurred");
       }
       break;
+    }
 
-    case "pokedex":
+    case "pokedex": {
       if (args.length === 0) {
         message.reply("Please provide a Pokemon name");
         break;
@@ -152,6 +139,7 @@ client.on(Events.MessageCreate, async (message) => {
         message.reply("An error occurred");
       }
       break;
+    }
 
     case "coin":
     case "flip":
