@@ -1,15 +1,14 @@
-require("dotenv").config(); // 1. Load environment variables
-
+require("dotenv").config();
+const fs = require("fs"); // Required to read the file system
 const {
   Client,
   GatewayIntentBits,
   Events,
-  EmbedBuilder,
-  PermissionsBitField,
+  Collection, // Required to store commands in memory
 } = require("discord.js");
 
 // --- INITIAL SETUP ---
-const PREFIX = process.env.PREFIX || "!";
+const PREFIX = process.env.PREFIX || "-";
 const TOKEN = process.env.DISCORD_TOKEN;
 
 console.log("1. System starting...");
@@ -24,24 +23,38 @@ const client = new Client({
   ],
 });
 
-// Modules
-const pingCommand = require("./commands/ping.js");
-const nameCommand = require("./commands/name.js");
-const avatarCommand = require("./commands/avatar.js");
-const eightBallCommand = require("./commands/8ball.js");
-const pokedexCommand = require("./commands/pokedex.js");
-const coinCommand = require("./commands/coin.js");
-const clearCommand = require("./commands/clear.js");
-const serverInfo = require("./commands/serverInfo.js");
-const kick = require("./commands/kick.js");
-const timeout = require("./commands/timeout.js");
+// --- DYNAMIC COMMAND HANDLER ---
+// This Collection will hold all your command files
+client.commands = new Collection();
 
-// --- EVENT: CLIENT READY ---
+// Read the 'commands' folder
+const commandFiles = fs
+  .readdirSync("./commands")
+  .filter((file) => file.endsWith(".js"));
+
+console.log("--- Loading Modules ---");
+
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+
+  // Check if the command file has the required structure
+  if ("name" in command && "execute" in command) {
+    client.commands.set(command.name, command);
+    console.log(`✅ [${command.name}] module loaded.`);
+  } else {
+    console.log(
+      `⚠️ Warning: The command at ${file} is missing "name" or "execute".`
+    );
+  }
+}
+console.log("-----------------------");
+
+// --- EVENTS ---
+
 client.once(Events.ClientReady, (c) => {
-  console.log(`✅ Ready! Logged in as ${c.user.tag}`);
+  console.log(`Sentinel is online as ${c.user.tag}`);
 });
 
-// --- EVENT: GUILD MEMBER ADD (Welcome) ---
 client.on(Events.GuildMemberAdd, (member) => {
   const channel = member.guild.channels.cache.find(
     (ch) => ch.name === "general"
@@ -50,58 +63,28 @@ client.on(Events.GuildMemberAdd, (member) => {
   channel.send(`Welcome to the server, ${member}! 👋`);
 });
 
-// --- EVENT: MESSAGE CREATE (Command Handler) ---
+// --- MESSAGE EVENT (Dynamic Handler) ---
 client.on(Events.MessageCreate, async (message) => {
-  if (message.author.bot) return;
-  if (!message.content.startsWith(PREFIX)) return;
+  // Ignore bots and messages without prefix
+  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
+  const commandName = args.shift().toLowerCase();
 
-  switch (command) {
-    case "ping":
-      pingCommand.execute(message, args);
-      break;
+  // Check if the command exists in our Collection
+  const command = client.commands.get(commandName);
 
-    case "name":
-      nameCommand.execute(message, args);
-      break;
+  if (!command) return; // Command not found, do nothing
 
-    case "avatar":
-      avatarCommand.execute(message, args);
-      break;
-
-    case "8ball":
-      eightBallCommand.execute(message, args);
-      break;
-
-    case "pokedex": {
-      pokedexCommand.execute(message, args);
-      break;
-    }
-
-    case "coin":
-      coinCommand.execute(message, args);
-      break;
-
-    case "clear":
-      clearCommand.execute(message, args);
-      break;
-    case "serverinfo":
-      serverInfo.execute(message, args);
-      break;
-    case "kick":
-      kick.execute(message, args);
-      break;
-    case "timeout":
-      timeout.execute(message, args);
-      break;
-    default:
-      // Empty default to avoid spamming "Invalid command"
-      break;
+  try {
+    // Execute the command file
+    await command.execute(message, args);
+  } catch (error) {
+    console.error(error);
+    message.reply("There was an error executing that command!");
   }
 });
 
-// --- FINAL LOGIN ---
+// --- LOGIN ---
 console.log("3. Attempting login...");
 client.login(TOKEN);
