@@ -1,60 +1,51 @@
 require("dotenv").config();
-const fs = require("fs"); // Required to read the file system
-const {
-  Client,
-  GatewayIntentBits,
-  Events,
-  Collection, // Required to store commands in memory
-} = require("discord.js");
+const fs = require("fs");
+const { Client, GatewayIntentBits, Events, Collection } = require("discord.js");
 
-// --- INITIAL SETUP ---
-const PREFIX = process.env.PREFIX || "-";
 const TOKEN = process.env.DISCORD_TOKEN;
 
-console.log("1. System starting...");
-console.log(`2. Active PREFIX:: [${PREFIX}]`);
+console.log("1. System starting (Slash Mode)...");
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages, // Useful if you want to keep logs
+    GatewayIntentBits.GuildMembers, // Required for welcome messages
   ],
 });
 
-// --- DYNAMIC COMMAND HANDLER ---
-// This Collection will hold all your command files
+// --- SLASH COMMAND LOADER ---
 client.commands = new Collection();
 
-// Read the 'commands' folder
 const commandFiles = fs
   .readdirSync("./commands")
   .filter((file) => file.endsWith(".js"));
 
-console.log("--- Loading Modules ---");
+console.log("--- Loading Slash Modules ---");
 
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
 
-  // Check if the command file has the required structure
-  if ("name" in command && "execute" in command) {
-    client.commands.set(command.name, command);
-    console.log(`✅ [${command.name}] module loaded.`);
+  // Verify new Slash structure (data and execute)
+  if ("data" in command && "execute" in command) {
+    client.commands.set(command.data.name, command);
+    console.log(`✅ [/${command.data.name}] loaded.`);
   } else {
+    // This warning is expected for files not yet migrated (like 8ball.js)
     console.log(
-      `⚠️ Warning: The command at ${file} is missing "name" or "execute".`
+      `⚠️ The file ${file} is not a valid Slash Command (missing "data" or "execute").`
     );
   }
 }
-console.log("-----------------------");
+console.log("-----------------------------");
 
 // --- EVENTS ---
 
 client.once(Events.ClientReady, (c) => {
-  console.log(`Sentinel is online as ${c.user.tag}`);
+  console.log(`🛡️ Sentinel Core is ready as ${c.user.tag}`);
 });
 
+// (Optional) Welcome system
 client.on(Events.GuildMemberAdd, (member) => {
   const channel = member.guild.channels.cache.find(
     (ch) => ch.name === "general"
@@ -63,25 +54,34 @@ client.on(Events.GuildMemberAdd, (member) => {
   channel.send(`Welcome to the server, ${member}! 👋`);
 });
 
-// --- MESSAGE EVENT (Dynamic Handler) ---
-client.on(Events.MessageCreate, async (message) => {
-  // Ignore bots and messages without prefix
-  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
+// --- INTERACTION HANDLER ---
+client.on(Events.InteractionCreate, async (interaction) => {
+  // We only care about chat commands (Slash Commands)
+  if (!interaction.isChatInputCommand()) return;
 
-  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const commandName = args.shift().toLowerCase();
+  const command = interaction.client.commands.get(interaction.commandName);
 
-  // Check if the command exists in our Collection
-  const command = client.commands.get(commandName);
-
-  if (!command) return; // Command not found, do nothing
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
 
   try {
-    // Execute the command file
-    await command.execute(message, args);
+    await command.execute(interaction);
   } catch (error) {
     console.error(error);
-    message.reply("There was an error executing that command!");
+    // Safe error handling (if already replied, use followUp)
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "There was an error executing this command!",
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content: "There was an error executing this command!",
+        ephemeral: true,
+      });
+    }
   }
 });
 
