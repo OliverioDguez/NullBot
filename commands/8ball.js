@@ -1,10 +1,22 @@
+const { SlashCommandBuilder } = require("discord.js");
+
 module.exports = {
-  name: "8ball",
-  description: "Replies with a random 8ball response",
-  execute(message, args) {
-    if (!args.length) {
-      return message.reply("Please provide a question");
-    }
+  // 1. Definition
+  data: new SlashCommandBuilder()
+    .setName("8ball")
+    .setDescription("Ask the magic 8ball a question")
+    .addStringOption((option) =>
+      option
+        .setName("question")
+        .setDescription("The question you want to ask")
+        .setRequired(true)
+    ),
+
+  // 2. Execution
+  async execute(interaction) {
+    // Get the question from options
+    const question = interaction.options.getString("question");
+
     const box = [
       "Yes",
       "No",
@@ -15,7 +27,13 @@ module.exports = {
       "Never",
       "Always",
     ];
+
     const index = Math.floor(Math.random() * box.length);
-    message.reply(box[index]);
+    const answer = box[index];
+
+    // Reply with both question and answer
+    await interaction.reply(
+      `🎱 **Question:** ${question}\n**Answer:** ${answer}`
+    );
   },
 };
