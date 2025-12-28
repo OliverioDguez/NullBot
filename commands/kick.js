@@ -1,39 +1,75 @@
-const { PermissionsBitField } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 
 module.exports = {
-  name: "kick",
-  description: "Kick a user from the server",
-  async execute(message, args) {
-    // Permission check
-    if (
-      !message.member.permissions.has(PermissionsBitField.Flags.KickMembers)
-    ) {
-      return message.reply("You don't have permission to kick members");
+  // 1. DEFINITION
+  data: new SlashCommandBuilder()
+    .setName("kick")
+    .setDescription("Kick a user from the server")
+    // Define the target user input
+    .addUserOption((option) =>
+      option
+        .setName("target")
+        .setDescription("The user to kick")
+        .setRequired(true)
+    )
+    // Define an optional reason input
+    .addStringOption((option) =>
+      option.setName("reason").setDescription("Reason for the kick")
+    )
+    // Enforce permissions (Users without KickMembers won't see this command)
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
+
+  // 2. EXECUTION
+  async execute(interaction) {
+    // Retrieve the target member object from the interaction
+    const targetMember = interaction.options.getMember("target");
+    // Retrieve the reason (or set a default one)
+    const reason =
+      interaction.options.getString("reason") || "No reason provided";
+
+    // --- Validation Checks ---
+
+    // Ensure the user is actually in the server
+    if (!targetMember) {
+      return interaction.reply({
+        content: "That user is not currently in this server.",
+        ephemeral: true,
+      });
     }
-    // Validate arguments
-    const member = message.mentions.members.first();
-    if (!member) {
-      return message.reply("Please mention a user to kick");
+
+    // Prevent self-kick
+    if (targetMember.id === interaction.user.id) {
+      return interaction.reply({
+        content: "You cannot kick yourself.",
+        ephemeral: true,
+      });
     }
-    // Safety check
-    if (member.id === message.author.id) {
-      return message.reply("You cannot kick yourself");
+
+    // Check bot hierarchy (Can the bot kick this person?)
+    // Note: 'kickable' returns false if the target has higher roles than the bot
+    if (!targetMember.kickable) {
+      return interaction.reply({
+        content:
+          "I cannot kick this user. They might have a higher role than me or be the server owner.",
+        ephemeral: true,
+      });
     }
-    // Check if the target is kickable by the bot (Hierarchy check)
-    if (!member.kickable) {
-      return message.reply(
-        "I cannot kick this user. They might have a higher role than me or be the server owner."
-      );
-    }
-    //Excution
+
+    // --- Execution ---
     try {
-      await member.kick();
-      message.channel.send(
-        `**${member.user.tag}** has been kicked from the server.`
+      // Perform the kick with the reason provided
+      await targetMember.kick(reason);
+
+      // Send public confirmation
+      await interaction.reply(
+        `**${targetMember.user.tag}** has been kicked from the server.`
       );
     } catch (error) {
       console.error(error);
-      message.reply("Failed to kick the user");
+      await interaction.reply({
+        content: "Failed to kick the user.",
+        ephemeral: true,
+      });
     }
   },
 };
