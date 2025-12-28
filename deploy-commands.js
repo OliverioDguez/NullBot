@@ -25,6 +25,12 @@ const commandFolders = fs.readdirSync(foldersPath);
 for (const folder of commandFolders) {
   const commandsPath = path.join(foldersPath, folder);
 
+  // 🛠️ FIX: Ignore .DS_Store and non-directory files
+  // This prevents the ENOTDIR crash on macOS
+  if (!fs.statSync(commandsPath).isDirectory()) {
+    continue;
+  }
+
   // 4. We read the files .js INSIDE that folder
   const commandFiles = fs
     .readdirSync(commandsPath)
@@ -72,3 +78,4 @@ const rest = new REST().setToken(TOKEN);
     console.error(error);
   }
 })();
+// Asegúrate de que esta línea de arrib
