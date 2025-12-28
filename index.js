@@ -6,7 +6,12 @@ const { initDB } = require("./database/db");
 const TOKEN = process.env.DISCORD_TOKEN;
 
 console.log("1. System starting...");
+
+// Initialize DB
+// Note: ideally this should be awaited if using MySQL,
+// but currently it runs in the background.
 initDB();
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -24,9 +29,17 @@ console.log("--- Loading Slash Modules ---");
 
 for (const folder of commandFolders) {
   const commandsPath = path.join(foldersPath, folder);
+
+  // 🛠️ FIX: Ignore system files like .DS_Store
+  // If it's not a directory, skip it.
+  if (!fs.statSync(commandsPath).isDirectory()) {
+    continue;
+  }
+
   const commandFiles = fs
     .readdirSync(commandsPath)
     .filter((file) => file.endsWith(".js"));
+
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
