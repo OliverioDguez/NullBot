@@ -1,0 +1,10 @@
+{
+  "prefix": "!",
+  "colors": {
+    "primary": "#FFFFFF",
+    "secondary": "#808080",
+    "error": "#FF0000",
+    "success": "#00FF00"
+  },
+  "ownerId": "394568306499125260"
+}
