@@ -1,44 +1,49 @@
-const { EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
-  name: "help",
-  description: "Displays a list of available commands.",
-  execute(message, args) {
-    // 1. Get the collection of loaded commands
-    const { commands } = message.client;
+  // 1. DEFINITION
+  data: new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("Displays a list of available commands."),
 
-    // Get prefix to show correct usage examples
-    const prefix = process.env.PREFIX || "!";
+  // 2. EXECUTION
+  async execute(interaction) {
+    // Get the collection of loaded commands from the interaction client
+    const { commands } = interaction.client;
 
-    // 2. Build the Embed
+    // 3. Build the Embed
     const helpEmbed = new EmbedBuilder()
       .setColor(0x00aaff) // Sentinel Blue
       .setTitle("🛡️ Sentinel Core | Command List")
       .setDescription(
         "Here are the commands currently loaded and ready to use."
       )
-      .setThumbnail(message.client.user.displayAvatarURL())
+      .setThumbnail(interaction.client.user.displayAvatarURL())
       .setFooter({
-        text: `Use ${prefix}command to execute • Sentinel Boilerplate`,
+        text: `Type / to start a command • Sentinel Boilerplate`,
       })
       .setTimestamp();
 
-    // 3. Generate fields dynamically
-    // Use .map to transform each command into a field object
+    // 4. Generate fields dynamically
     const fields = commands.map((cmd) => {
+      // IMPORTANT: In the new structure, name and description are inside 'data'
+      // Using optional chaining (?.) for safety
+      const name = cmd.data?.name || "unknown";
+      const description = cmd.data?.description || "No description available.";
+
       return {
-        name: `${prefix}${cmd.name}`,
-        // If no description, provide default text to avoid crash
-        value: cmd.description || "No description available.",
+        name: `/${name}`, // Visually add '/' to indicate it's a slash command
+        value: description,
         inline: true,
       };
     });
 
-    // Add all fields to the embed
-    // NOTE: Discord only allows 25 fields per embed.
+    // Add fields (Reminder: Discord allows max 25 fields per embed)
+    // If you have more than 25 commands, this will error and require pagination.
     helpEmbed.addFields(fields);
 
-    // 4. Send
-    message.reply({ embeds: [helpEmbed] });
+    // 5. Send response
+    // 'ephemeral: true' makes the list visible only to the user (optional)
+    await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
   },
 };
