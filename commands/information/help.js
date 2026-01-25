@@ -16,7 +16,7 @@ module.exports = {
       .setColor(0x00aaff) // Sentinel Blue
       .setTitle("🛡️ Sentinel Core | Command List")
       .setDescription(
-        "Here are the commands currently loaded and ready to use."
+        "Here are the commands currently loaded and ready to use.",
       )
       .setThumbnail(interaction.client.user.displayAvatarURL())
       .setFooter({

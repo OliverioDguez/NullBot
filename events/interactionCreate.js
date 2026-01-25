@@ -1,4 +1,4 @@
-const { Events } = require("discord.js");
+const { Events, MessageFlags } = require("discord.js");
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -10,7 +10,7 @@ module.exports = {
 
     if (!command) {
       console.error(
-        `No command matching ${interaction.commandName} was found.`
+        `No command matching ${interaction.commandName} was found.`,
       );
       return;
     }
@@ -21,16 +21,20 @@ module.exports = {
       console.error(`Error executing ${interaction.commandName}`);
       console.error(error);
 
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          content: "There was an error executing this command!",
-          ephemeral: true,
-        });
-      } else {
-        await interaction.reply({
-          content: "There was an error executing this command!",
-          ephemeral: true,
-        });
+      const errorMessage = {
+        content: "There was an error executing this command!",
+        flags: MessageFlags.Ephemeral,
+      };
+
+      try {
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(errorMessage);
+        } else {
+          await interaction.reply(errorMessage);
+        }
+      } catch (replyError) {
+        // Interaction already expired, just log it
+        console.error("Could not send error message - interaction expired");
       }
     }
   },

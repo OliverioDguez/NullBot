@@ -1,32 +1,31 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  MessageFlags,
+} = require("discord.js");
 
 module.exports = {
   // 1. DEFINITION
   data: new SlashCommandBuilder()
     .setName("timeout")
     .setDescription("Timeout a user for a specific duration")
-    // Target User
     .addUserOption((option) =>
       option
         .setName("target")
         .setDescription("The user to timeout")
+        .setRequired(true),
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("minutes")
+        .setDescription("Duration in minutes (1 - 40320)")
         .setRequired(true)
+        .setMinValue(1)
+        .setMaxValue(40320),
     )
-    // Duration (Minutes)
-    .addIntegerOption(
-      (option) =>
-        option
-          .setName("minutes")
-          .setDescription("Duration in minutes (1 - 40320)")
-          .setRequired(true)
-          .setMinValue(1)
-          .setMaxValue(40320) // Discord API limit is 28 days
-    )
-    // Reason (Optional)
     .addStringOption((option) =>
-      option.setName("reason").setDescription("Reason for the timeout")
+      option.setName("reason").setDescription("Reason for the timeout"),
     )
-    // Permission Lock (User needs ModerateMembers to see this)
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .setDMPermission(false),
 
@@ -37,48 +36,43 @@ module.exports = {
     const reason =
       interaction.options.getString("reason") || "Timeout by Sentinel Command";
 
-    // --- Safety Checks ---
-
-    // 1. Check if user is in guild
+    // Validation checks (before deferring - these are fast)
     if (!targetMember) {
       return interaction.reply({
         content: "That user is not currently in this server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
-    // 2. Self-Harm Check
     if (targetMember.id === interaction.user.id) {
       return interaction.reply({
         content: "You cannot timeout yourself 😅",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
-    // 3. Hierarchy Check (Bot vs Target)
     if (!targetMember.moderatable) {
       return interaction.reply({
         content:
           "❌ I cannot timeout this user. They might have a higher role than me or be the owner.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
-    // --- Execution ---
-    try {
-      // Convert minutes to milliseconds
-      const durationMs = minutes * 60 * 1000;
+    // Defer for the actual timeout operation
+    await interaction.deferReply();
 
+    try {
+      const durationMs = minutes * 60 * 1000;
       await targetMember.timeout(durationMs, reason);
 
-      await interaction.reply(
-        `✅ **${targetMember.user.tag}** has been timed out for **${minutes}** minute(s).\nReason: *${reason}*`
+      await interaction.editReply(
+        `✅ **${targetMember.user.tag}** has been timed out for **${minutes}** minute(s).\nReason: *${reason}*`,
       );
     } catch (error) {
       console.error(error);
-      await interaction.reply({
+      await interaction.editReply({
         content: "An error occurred while trying to timeout the user.",
-        ephemeral: true,
       });
     }
   },

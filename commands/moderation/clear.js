@@ -15,7 +15,7 @@ module.exports = {
         .setDescription("Number of messages to delete")
         .setMinValue(1)
         .setMaxValue(100)
-        .setRequired(true)
+        .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
@@ -23,18 +23,28 @@ module.exports = {
   async execute(interaction) {
     const amount = interaction.options.getInteger("amount");
 
-    try {
-      await interaction.channel.bulkDelete(amount, true);
+    // Defer reply immediately to prevent 3-second timeout
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-      await interaction.reply({
-        content: `Successfully deleted **${amount}** messages.`,
-        flags: MessageFlags.Ephemeral,
+    try {
+      // bulkDelete returns a Collection of deleted messages
+      const deleted = await interaction.channel.bulkDelete(amount, true);
+
+      // Show actual count (messages older than 14 days are skipped)
+      const actualCount = deleted.size;
+      let message = `Successfully deleted **${actualCount}** message(s).`;
+
+      if (actualCount < amount) {
+        message += `\n⚠️ ${amount - actualCount} message(s) were older than 14 days and couldn't be deleted.`;
+      }
+
+      await interaction.editReply({
+        content: message,
       });
     } catch (error) {
       console.error(error);
-      await interaction.reply({
+      await interaction.editReply({
         content: "There was an error trying to prune messages in this channel.",
-        flags: MessageFlags.Ephemeral,
       });
     }
   },

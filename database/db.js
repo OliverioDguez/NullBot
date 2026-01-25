@@ -7,7 +7,7 @@ const dbPath = path.join(__dirname, "sentinel.sqlite");
 
 // Conexión a la base de datos
 // 'verbose: console.log' imprime las queries en consola (útil para debug, quítalo en producción)
-const db = new Database(dbPath, { verbose: console.log });
+const db = new Database(dbPath);
 
 // Optimización recomendada para SQLite (Write-Ahead Logging)
 db.pragma("journal_mode = WAL");

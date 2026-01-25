@@ -77,3 +77,13 @@ console.log("-----------------------------");
 
 // --- LOGIN ---
 client.login(TOKEN);
+
+// --- GRACEFUL SHUTDOWN ---
+const shutdown = () => {
+  console.log("\n🛑 Shutting down Sentinel gracefully...");
+  client.destroy();
+  process.exit(0);
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

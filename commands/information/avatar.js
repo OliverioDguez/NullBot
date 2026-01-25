@@ -8,14 +8,13 @@ module.exports = {
         option
           .setName("target")
           .setDescription("The user to show avatar for")
-          .setRequired(false) // Optional: if empty, show yours
+          .setRequired(false), // Optional: if empty, show yours
     ),
   async execute(interaction) {
     const targetUser =
       interaction.options.getUser("target") || interaction.user;
     const avatarUrl = targetUser.displayAvatarURL({
       size: 1024,
-      dynamic: true,
     });
     const avatarEmbed = new EmbedBuilder()
       .setColor(0x0099ff)

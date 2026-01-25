@@ -9,7 +9,7 @@ module.exports = {
       option
         .setName("question")
         .setDescription("The question you want to ask")
-        .setRequired(true)
+        .setRequired(true),
     ),
 
   // 2. Execution
@@ -32,7 +32,7 @@ module.exports = {
     const answer = box[index];
 
     await interaction.reply(
-      `🎱 **Question:** ${question}\n**Answer:** ${answer}`
+      `🎱 **Question:** ${question}\n**Answer:** ${answer}`,
     );
   },
 };
