@@ -1,22 +1,54 @@
-# Sentinel: Discord.js Modular Boilerplate
+# Sentinel
 
-> A robust, scalable, and clean architecture for Discord.js v14 bots with SQLite integration.
+> A modular Discord.js v14 bot with XP leveling and SQLite integration.
 
-Sentinel is a boilerplate designed to solve the common "spaghetti code" problem in Discord bot development. It provides a solid foundation with separated concerns, dynamic handlers, and a pre-configured database connection, making it perfect for both small projects and large-scale applications.
+![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)
+![Node.js](https://img.shields.io/badge/node.js-v16.9%2B-339933?logo=nodedotjs&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Features
 
-- **Modular Architecture:** Commands and Events are separated into their own folders.
-- **Dynamic Command Handler:** Supports sub-folders (categories) for better organization.
-- **Event Handler:** Keeps your `index.js` clean by loading events dynamically.
-- **SQLite Integration:** Pre-configured `better-sqlite3` setup for fast, synchronous local database management.
-- **Centralized Config:** Manage colors, emojis, and IDs from a single `config.json` file.
-- **Slash Commands:** Fully compatible with Discord's latest Slash Command system.
+- **XP Leveling System** - Users earn XP by chatting, with level-up announcements
+- **Slash Commands** - Modern Discord slash command system
+- **Modular Architecture** - Commands and events organized into folders
+- **SQLite Database** - Persistent storage for user levels and XP
+- **Graceful Shutdown** - Properly closes connections on exit
 
-## Prerequisites
+## Commands
 
-- Node.js (v16.9.0 or higher)
-- A Discord Bot Token
+### 📊 Levels
+
+| Command        | Description                      |
+| -------------- | -------------------------------- |
+| `/rank`        | Check your level and XP progress |
+| `/leaderboard` | View the server's top users      |
+
+### 🎮 Fun
+
+| Command    | Description                    |
+| ---------- | ------------------------------ |
+| `/8ball`   | Ask the magic 8ball a question |
+| `/coin`    | Flip a coin                    |
+| `/pokedex` | Look up Pokémon information    |
+
+### ℹ️ Information
+
+| Command       | Description                 |
+| ------------- | --------------------------- |
+| `/avatar`     | Display a user's avatar     |
+| `/help`       | List all available commands |
+| `/name`       | Show the bot's name         |
+| `/ping`       | Check bot latency           |
+| `/serverinfo` | Display server information  |
+
+### 🛡️ Moderation
+
+| Command    | Description                   |
+| ---------- | ----------------------------- |
+| `/ban`     | Ban a user from the server    |
+| `/clear`   | Delete messages (up to 100)   |
+| `/kick`    | Kick a user from the server   |
+| `/timeout` | Timeout a user for a duration |
 
 ## Installation
 
@@ -33,55 +65,55 @@ Sentinel is a boilerplate designed to solve the common "spaghetti code" problem 
    npm install
    ```
 
-3. **Environment Setup**
+3. **Configure environment**
 
-   Create a `.env` file in the root directory and add your credentials:
+   Create a `.env` file:
 
-   ```bash
-   DISCORD_TOKEN=your_bot_token_here
-   CLIENT_ID=your_client_id_here
-   GUILD_ID=your_guild_id_here  # Optional: For instant dev updates
+   ```env
+   DISCORD_TOKEN=your_bot_token
+   CLIENT_ID=your_client_id
+   GUILD_ID=your_guild_id  # Optional: for faster dev testing
    ```
 
-4. **Configuration (Optional)**
+4. **Deploy commands and start**
+   ```bash
+   npm start
+   ```
 
-   Edit `config.json` to customize your bot's theme colors and common assets.
+## XP System
 
-## Usage
+Users earn **15 XP** (±10) per message with a 60-second cooldown to prevent spam.
 
-### Register Commands
+**Level Formula:** `Level = floor(0.1 × √XP) + 1`
 
-Before starting the bot, you need to register your Slash Commands with Discord.
+| Level | XP Required |
+| ----- | ----------- |
+| 5     | 1,600       |
+| 10    | 8,100       |
+| 20    | 36,100      |
+| 50    | 240,100     |
 
-```bash
-node deploy-commands.js
+## Project Structure
+
 ```
-
-### Start the bot
-
-```bash
-node index.js
+Sentinel/
+├── commands/
+│   ├── fun/          # Fun commands
+│   ├── information/  # Info commands
+│   ├── levels/       # XP/Leveling commands
+│   └── moderation/   # Mod commands
+├── database/
+│   └── db.js         # SQLite + XP functions
+├── events/
+│   ├── guildMemberAdd.js
+│   ├── interactionCreate.js
+│   ├── messageCreate.js  # XP tracking
+│   └── ready.js
+├── config.json
+├── deploy-commands.js
+└── index.js
 ```
-
-You should see a message indicating that the commands, events, and database have been loaded successfully.
-
-## Database Usage
-
-The bot uses `better-sqlite3`. The connection is already set up in `database/db.js`.
-
-### Example usage
-
-```javascript
-const { db } = require("../../database/db");
-
-// Execute SQL directly
-const row = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/2Oliverio/Sentinel/blob/main/LICENSE) file for details.
+[MIT](LICENSE)

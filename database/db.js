@@ -1,35 +1,124 @@
 const Database = require("better-sqlite3");
 const path = require("path");
-const fs = require("fs");
 
-// Nos aseguramos de que el archivo .sqlite se guarde en la carpeta database
 const dbPath = path.join(__dirname, "sentinel.sqlite");
-
-// Conexión a la base de datos
-// 'verbose: console.log' imprime las queries en consola (útil para debug, quítalo en producción)
 const db = new Database(dbPath);
 
-// Optimización recomendada para SQLite (Write-Ahead Logging)
+// Enable WAL mode for better performance
 db.pragma("journal_mode = WAL");
 
+// --- XP/Level Configuration ---
+const XP_PER_MESSAGE = 15; // Base XP per message
+const XP_VARIANCE = 10; // Random variance (+/- this amount)
+const XP_COOLDOWN = 60000; // 60 seconds between XP gains (prevents spam)
+
+/**
+ * Calculate level from total XP
+ * Formula: level = floor(0.1 * sqrt(xp))
+ * This means: Level 10 = 10,000 XP, Level 20 = 40,000 XP, etc.
+ */
+function calculateLevel(xp) {
+  return Math.floor(0.1 * Math.sqrt(xp)) + 1;
+}
+
+/**
+ * Calculate XP required for a specific level
+ */
+function xpForLevel(level) {
+  return Math.pow((level - 1) / 0.1, 2);
+}
+
+/**
+ * Get user data from database
+ */
+function getUser(userId) {
+  const stmt = db.prepare("SELECT * FROM user_levels WHERE user_id = ?");
+  return stmt.get(userId);
+}
+
+/**
+ * Add XP to a user and return level up info if applicable
+ */
+function addXP(userId) {
+  const now = Date.now();
+  let user = getUser(userId);
+
+  // Create user if doesn't exist
+  if (!user) {
+    const insert = db.prepare(
+      "INSERT INTO user_levels (user_id, xp, level, last_message_date) VALUES (?, 0, 1, 0)",
+    );
+    insert.run(userId);
+    user = { user_id: userId, xp: 0, level: 1, last_message_date: 0 };
+  }
+
+  // Check cooldown
+  if (now - user.last_message_date < XP_COOLDOWN) {
+    return null; // Still on cooldown
+  }
+
+  // Calculate XP to add (with variance)
+  const xpToAdd =
+    XP_PER_MESSAGE + Math.floor(Math.random() * XP_VARIANCE * 2) - XP_VARIANCE;
+  const newXP = user.xp + Math.max(xpToAdd, 5); // Minimum 5 XP
+  const oldLevel = user.level;
+  const newLevel = calculateLevel(newXP);
+
+  // Update database
+  const update = db.prepare(
+    "UPDATE user_levels SET xp = ?, level = ?, last_message_date = ? WHERE user_id = ?",
+  );
+  update.run(newXP, newLevel, now, userId);
+
+  // Return level up info if leveled up
+  if (newLevel > oldLevel) {
+    return { leveledUp: true, oldLevel, newLevel, xp: newXP };
+  }
+
+  return { leveledUp: false, xp: newXP, level: newLevel };
+}
+
+/**
+ * Get top users for leaderboard
+ */
+function getLeaderboard(limit = 10) {
+  const stmt = db.prepare("SELECT * FROM user_levels ORDER BY xp DESC LIMIT ?");
+  return stmt.all(limit);
+}
+
+/**
+ * Get user rank (position on leaderboard)
+ */
+function getUserRank(userId) {
+  const stmt = db.prepare(`
+    SELECT COUNT(*) + 1 as rank 
+    FROM user_levels 
+    WHERE xp > (SELECT xp FROM user_levels WHERE user_id = ?)
+  `);
+  const result = stmt.get(userId);
+  return result ? result.rank : null;
+}
+
 module.exports = {
-  // Exponemos la instancia de la db para usarla en los comandos
   db,
-
-  // Función para inicializar tablas base
   initDB: () => {
-    // Ejemplo: Tabla de Usuarios/Niveles
     const createUsersTable = db.prepare(`
-            CREATE TABLE IF NOT EXISTS user_levels (
-                user_id TEXT PRIMARY KEY,
-                xp INTEGER DEFAULT 0,
-                level INTEGER DEFAULT 1,
-                last_message_date INTEGER
-            );
-        `);
-
+      CREATE TABLE IF NOT EXISTS user_levels (
+        user_id TEXT PRIMARY KEY,
+        xp INTEGER DEFAULT 0,
+        level INTEGER DEFAULT 1,
+        last_message_date INTEGER
+      );
+    `);
     createUsersTable.run();
-
-    console.log("Database tables initialized.");
+    console.log("📊 Database tables initialized.");
   },
+  // XP System exports
+  getUser,
+  addXP,
+  getLeaderboard,
+  getUserRank,
+  calculateLevel,
+  xpForLevel,
+  XP_PER_MESSAGE,
 };
