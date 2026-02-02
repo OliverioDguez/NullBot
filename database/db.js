@@ -99,6 +99,38 @@ function getUserRank(userId) {
   return result ? result.rank : null;
 }
 
+/**
+ * Get guild configuration
+ */
+function getGuildConfig(guildId) {
+  const stmt = db.prepare("SELECT * FROM guild_config WHERE guild_id = ?");
+  return stmt.get(guildId) || null;
+}
+
+/**
+ * Set a guild configuration value
+ */
+function setGuildConfig(guildId, key, value) {
+  const validKeys = ["welcome_channel", "log_channel", "level_up_channel"];
+  if (!validKeys.includes(key)) {
+    throw new Error(`Invalid config key: ${key}`);
+  }
+
+  // Upsert: insert or update
+  const existing = getGuildConfig(guildId);
+  if (existing) {
+    const stmt = db.prepare(
+      `UPDATE guild_config SET ${key} = ? WHERE guild_id = ?`,
+    );
+    stmt.run(value, guildId);
+  } else {
+    const stmt = db.prepare(
+      `INSERT INTO guild_config (guild_id, ${key}) VALUES (?, ?)`,
+    );
+    stmt.run(guildId, value);
+  }
+}
+
 module.exports = {
   db,
   initDB: () => {
@@ -111,6 +143,18 @@ module.exports = {
       );
     `);
     createUsersTable.run();
+
+    // Guild config table for per-server settings
+    const createGuildConfigTable = db.prepare(`
+      CREATE TABLE IF NOT EXISTS guild_config (
+        guild_id TEXT PRIMARY KEY,
+        welcome_channel TEXT,
+        log_channel TEXT,
+        level_up_channel TEXT
+      );
+    `);
+    createGuildConfigTable.run();
+
     console.log("📊 Database tables initialized.");
   },
   // XP System exports
@@ -121,4 +165,7 @@ module.exports = {
   calculateLevel,
   xpForLevel,
   XP_PER_MESSAGE,
+  // Guild config exports
+  getGuildConfig,
+  setGuildConfig,
 };

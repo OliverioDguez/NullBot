@@ -1,18 +1,23 @@
 const { Events, PermissionFlagsBits } = require("discord.js");
-const { welcomeChannel } = require("../config.json");
+const { getGuildConfig } = require("../database/db");
 
 module.exports = {
   name: Events.GuildMemberAdd,
   once: false,
   async execute(member) {
-    // Find the welcome channel from config (case-insensitive)
-    const channel = member.guild.channels.cache.find(
-      (ch) => ch.name.toLowerCase() === welcomeChannel.toLowerCase(),
-    );
+    // Get per-guild config from database
+    const config = getGuildConfig(member.guild.id);
+
+    if (!config?.welcome_channel) {
+      return; // No welcome channel configured for this guild
+    }
+
+    // Find the welcome channel by ID
+    const channel = member.guild.channels.cache.get(config.welcome_channel);
 
     if (!channel) {
       console.warn(
-        `⚠️ Welcome channel "${welcomeChannel}" not found in ${member.guild.name}`,
+        `⚠️ Welcome channel ${config.welcome_channel} not found in ${member.guild.name}`,
       );
       return;
     }
