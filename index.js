@@ -17,6 +17,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildVoiceStates, // Required for voice channel logs
     GatewayIntentBits.MessageContent, // Required for XP system
   ],
 });
