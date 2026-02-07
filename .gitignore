@@ -2,6 +2,7 @@
 node_modules
 .env
 
-# SQLite
+# SQLite (all database files)
+*.sqlite
 *.sqlite-wal
 *.sqlite-shm
