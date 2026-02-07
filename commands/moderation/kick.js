@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   MessageFlags,
 } = require("discord.js");
+const { sendModLog } = require("../../utils/modLog");
 
 module.exports = {
   // 1. DEFINITION
@@ -69,6 +70,14 @@ module.exports = {
       await interaction.reply(
         `👢 **${targetMember.user.tag}** has been kicked from the server.\n**Reason:** ${reason}`,
       );
+
+      // Send mod log
+      await sendModLog(interaction.guild, {
+        action: "kick",
+        target: targetMember.user,
+        moderator: interaction.user,
+        reason,
+      });
     } catch (error) {
       console.error(error);
       await interaction.reply({

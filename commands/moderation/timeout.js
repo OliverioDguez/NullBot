@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   MessageFlags,
 } = require("discord.js");
+const { sendModLog } = require("../../utils/modLog");
 
 module.exports = {
   // 1. DEFINITION
@@ -78,6 +79,15 @@ module.exports = {
       await interaction.reply(
         `✅ **${targetMember.user.tag}** has been timed out for **${minutes}** minute(s).\nReason: *${reason}*`,
       );
+
+      // Send mod log
+      await sendModLog(interaction.guild, {
+        action: "timeout",
+        target: targetMember.user,
+        moderator: interaction.user,
+        reason,
+        extra: `Duration: ${minutes} minute(s)`,
+      });
     } catch (error) {
       console.error(error);
       await interaction.reply({

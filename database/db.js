@@ -49,7 +49,7 @@ function addXP(userId) {
       "INSERT INTO user_levels (user_id, xp, level, last_message_date) VALUES (?, 0, 1, 0)",
     );
     insert.run(userId);
-    user = { user_id: userId, xp: 0, level: 1, last_message_date: 0 };
+    user = { user_id: userId, xp: 0, level: 1, last_message_date: null };
   }
 
   // Check cooldown
@@ -109,6 +109,7 @@ function getGuildConfig(guildId) {
 
 /**
  * Set a guild configuration value
+ * Uses specific prepared statements to avoid SQL injection
  */
 function setGuildConfig(guildId, key, value) {
   const validKeys = ["welcome_channel", "log_channel", "level_up_channel"];
@@ -116,18 +117,38 @@ function setGuildConfig(guildId, key, value) {
     throw new Error(`Invalid config key: ${key}`);
   }
 
-  // Upsert: insert or update
+  // Upsert: insert or update using specific prepared statements (no string interpolation)
   const existing = getGuildConfig(guildId);
+
+  // Define specific statements for each column to avoid SQL interpolation
+  const updateStatements = {
+    welcome_channel: db.prepare(
+      "UPDATE guild_config SET welcome_channel = ? WHERE guild_id = ?",
+    ),
+    log_channel: db.prepare(
+      "UPDATE guild_config SET log_channel = ? WHERE guild_id = ?",
+    ),
+    level_up_channel: db.prepare(
+      "UPDATE guild_config SET level_up_channel = ? WHERE guild_id = ?",
+    ),
+  };
+
+  const insertStatements = {
+    welcome_channel: db.prepare(
+      "INSERT INTO guild_config (guild_id, welcome_channel) VALUES (?, ?)",
+    ),
+    log_channel: db.prepare(
+      "INSERT INTO guild_config (guild_id, log_channel) VALUES (?, ?)",
+    ),
+    level_up_channel: db.prepare(
+      "INSERT INTO guild_config (guild_id, level_up_channel) VALUES (?, ?)",
+    ),
+  };
+
   if (existing) {
-    const stmt = db.prepare(
-      `UPDATE guild_config SET ${key} = ? WHERE guild_id = ?`,
-    );
-    stmt.run(value, guildId);
+    updateStatements[key].run(value, guildId);
   } else {
-    const stmt = db.prepare(
-      `INSERT INTO guild_config (guild_id, ${key}) VALUES (?, ?)`,
-    );
-    stmt.run(guildId, value);
+    insertStatements[key].run(guildId, value);
   }
 }
 

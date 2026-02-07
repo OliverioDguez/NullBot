@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   MessageFlags,
 } = require("discord.js");
+const { sendModLog } = require("../../utils/modLog");
 
 module.exports = {
   // 1. DEFINITION
@@ -97,6 +98,16 @@ module.exports = {
       await interaction.reply(
         `🔨 **${targetUser.tag}** has been banned from the server.\n**Reason:** ${reason}`,
       );
+
+      // Send mod log
+      await sendModLog(interaction.guild, {
+        action: "ban",
+        target: targetUser,
+        moderator: interaction.user,
+        reason,
+        extra:
+          deleteDays > 0 ? `Deleted ${deleteDays} day(s) of messages` : null,
+      });
     } catch (error) {
       console.error(error);
       await interaction.reply({

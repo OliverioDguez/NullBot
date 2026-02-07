@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   MessageFlags,
 } = require("discord.js");
+const { sendModLog } = require("../../utils/modLog");
 
 module.exports = {
   // 1. Definition
@@ -40,6 +41,14 @@ module.exports = {
 
       await interaction.editReply({
         content: message,
+      });
+
+      // Send mod log
+      await sendModLog(interaction.guild, {
+        action: "clear",
+        moderator: interaction.user,
+        reason: `Bulk deleted messages in #${interaction.channel.name}`,
+        extra: `${actualCount} message(s) deleted`,
       });
     } catch (error) {
       console.error(error);

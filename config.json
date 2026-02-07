@@ -3,7 +3,8 @@
     "primary": "#FFFFFF",
     "secondary": "#808080",
     "error": "#FF0000",
-    "success": "#00FF00"
+    "success": "#00FF00",
+    "embed": "#0099FF"
   },
   "ownerId": "394568306499125260",
   "welcomeChannel": "general"
