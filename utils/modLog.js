@@ -8,6 +8,7 @@ const ACTION_COLORS = {
   ban: "#FF0000",
   kick: "#FFA500",
   timeout: "#FFFF00",
+  untimeout: "#00FF00",
   clear: "#808080",
   warn: "#FF8C00",
   unban: "#00FF00",
@@ -20,9 +21,10 @@ const ACTION_EMOJIS = {
   ban: "🔨",
   kick: "👢",
   timeout: "⏰",
+  untimeout: "✅",
   clear: "🗑️",
   warn: "⚠️",
-  unban: "✅",
+  unban: "🔓",
 };
 
 /**
