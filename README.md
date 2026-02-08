@@ -127,7 +127,7 @@ When configured with `/config logs #channel`, Nullbot logs:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/2Oliverio/Nullbot.git
+   git clone https://github.com/OliverioDguez/Nullbot.git
    cd Nullbot
    ```
 
