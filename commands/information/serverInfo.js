@@ -54,7 +54,7 @@ module.exports = {
         // Check if banner exists before setting, though Discord.js handles null gracefully usually
         .setImage(guild.bannerURL({ size: 1024 }))
         .setFooter({
-          text: `Sentinel • Requested by ${interaction.user.username}`,
+          text: `Nullbot • Requested by ${interaction.user.username}`,
         })
         .setTimestamp();
 

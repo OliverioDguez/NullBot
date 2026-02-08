@@ -13,14 +13,14 @@ module.exports = {
 
     // 3. Build the Embed
     const helpEmbed = new EmbedBuilder()
-      .setColor(0x00aaff) // Sentinel Blue
-      .setTitle("🛡️ Sentinel Core | Command List")
+      .setColor(0x00aaff) // Nullbot Blue
+      .setTitle("🛡️ Nullbot | Command List")
       .setDescription(
         "Here are the commands currently loaded and ready to use.",
       )
       .setThumbnail(interaction.client.user.displayAvatarURL())
       .setFooter({
-        text: `Type / to start a command • Sentinel Boilerplate`,
+        text: `Type / to start a command • Nullbot`,
       })
       .setTimestamp();
 

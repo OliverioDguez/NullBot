@@ -1,4 +1,4 @@
-# Sentinel
+# Nullbot
 
 > A modular Discord.js v14 bot with XP leveling, moderation, automod, and anti-spam.
 
@@ -30,6 +30,9 @@
 | `/config banword <word>`   | Add a word to the banned words list  |
 | `/config unbanword <word>` | Remove a word from banned words list |
 | `/config bannedwords`      | View list of banned words            |
+| `/config autoreply`        | Add an auto-reply trigger            |
+| `/config removeautoreply`  | Remove an auto-reply trigger         |
+| `/config autoreplies`      | View all auto-replies                |
 
 ### 🛡️ Moderation
 
@@ -68,10 +71,11 @@
 | -------- | ------------------------------ |
 | `/8ball` | Ask the magic 8ball a question |
 | `/coin`  | Flip a coin                    |
+| `/poll`  | Create a poll (mods only)      |
 
 ## Warning System
 
-Sentinel includes a progressive warning system:
+Nullbot includes a progressive warning system:
 
 | Warnings | Action         |
 | -------- | -------------- |
@@ -84,7 +88,7 @@ Use `/warn` to warn users and `/warnings` to view their history.
 
 ## Anti-Spam
 
-Sentinel automatically detects and handles spam:
+Nullbot automatically detects and handles spam:
 
 | Type       | Trigger                | Action            |
 | ---------- | ---------------------- | ----------------- |
@@ -106,7 +110,7 @@ Configurable word filter for your server:
 
 ## Moderation Logging
 
-When configured with `/config logs #channel`, Sentinel logs:
+When configured with `/config logs #channel`, Nullbot logs:
 
 - 🔨 **Bans/Unbans** - With moderator and reason
 - 👢 **Kicks** - With moderator and reason
@@ -123,8 +127,8 @@ When configured with `/config logs #channel`, Sentinel logs:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/2Oliverio/Sentinel.git
-   cd Sentinel
+   git clone https://github.com/2Oliverio/Nullbot.git
+   cd Nullbot
    ```
 
 2. **Install dependencies**
@@ -165,7 +169,7 @@ Users earn **15 XP** (±10) per message with a 60-second cooldown to prevent spa
 ## Project Structure
 
 ```
-Sentinel/
+Nullbot/
 ├── commands/
 │   ├── admin/        # Server configuration
 │   ├── fun/          # Fun commands

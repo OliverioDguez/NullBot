@@ -40,7 +40,7 @@ module.exports = {
     const targetMember = interaction.options.getMember("target");
     const minutes = interaction.options.getInteger("minutes");
     const reason =
-      interaction.options.getString("reason") || "Timeout by Sentinel Command";
+      interaction.options.getString("reason") || "Timeout by Nullbot Command";
 
     // --- Safety Checks ---
 

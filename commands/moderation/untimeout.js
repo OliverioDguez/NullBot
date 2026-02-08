@@ -32,7 +32,7 @@ module.exports = {
     const targetMember = interaction.options.getMember("target");
     const reason =
       interaction.options.getString("reason") ||
-      "Timeout removed by Sentinel Command";
+      "Timeout removed by Nullbot Command";
 
     // --- Safety Checks ---
 

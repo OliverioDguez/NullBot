@@ -1,7 +1,7 @@
 const Database = require("better-sqlite3");
 const path = require("path");
 
-const dbPath = path.join(__dirname, "sentinel.sqlite");
+const dbPath = path.join(__dirname, "nullbot.sqlite");
 const db = new Database(dbPath);
 
 // Enable WAL mode for better performance

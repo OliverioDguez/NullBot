@@ -29,7 +29,7 @@ module.exports = {
   async execute(interaction) {
     const userId = interaction.options.getString("user_id");
     const reason =
-      interaction.options.getString("reason") || "Unbanned by Sentinel Command";
+      interaction.options.getString("reason") || "Unbanned by Nullbot Command";
 
     // Validate user ID format
     if (!/^\d{17,19}$/.test(userId)) {

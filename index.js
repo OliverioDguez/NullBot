@@ -82,7 +82,7 @@ client.login(TOKEN);
 
 // --- GRACEFUL SHUTDOWN ---
 const shutdown = () => {
-  console.log("\n🛑 Shutting down Sentinel gracefully...");
+  console.log("\n🛑 Shutting down Nullbot gracefully...");
   client.destroy();
   process.exit(0);
 };
