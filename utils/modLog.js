@@ -11,6 +11,7 @@ const ACTION_COLORS = {
   untimeout: "#00FF00",
   clear: "#808080",
   warn: "#FF8C00",
+  clearwarnings: "#00BFFF",
   unban: "#00FF00",
 };
 
@@ -24,6 +25,7 @@ const ACTION_EMOJIS = {
   untimeout: "✅",
   clear: "🗑️",
   warn: "⚠️",
+  clearwarnings: "🧹",
   unban: "🔓",
 };
 

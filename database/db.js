@@ -177,6 +177,19 @@ module.exports = {
     `);
     createGuildConfigTable.run();
 
+    // Warnings table for moderation
+    const createWarningsTable = db.prepare(`
+      CREATE TABLE IF NOT EXISTS warnings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        moderator_id TEXT NOT NULL,
+        reason TEXT,
+        timestamp INTEGER NOT NULL
+      );
+    `);
+    createWarningsTable.run();
+
     // Add banned_words column if it doesn't exist (for existing databases)
     try {
       db.prepare(
@@ -252,5 +265,38 @@ module.exports = {
       "UPDATE guild_config SET banned_words = ? WHERE guild_id = ?",
     ).run(JSON.stringify(words), guildId);
     return true;
+  },
+  // Warning system exports
+  addWarning: (guildId, userId, moderatorId, reason) => {
+    const stmt = db.prepare(
+      "INSERT INTO warnings (guild_id, user_id, moderator_id, reason, timestamp) VALUES (?, ?, ?, ?, ?)",
+    );
+    const result = stmt.run(guildId, userId, moderatorId, reason, Date.now());
+    return result.lastInsertRowid;
+  },
+  getWarnings: (guildId, userId) => {
+    const stmt = db.prepare(
+      "SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY timestamp DESC",
+    );
+    return stmt.all(guildId, userId);
+  },
+  getWarningCount: (guildId, userId) => {
+    const stmt = db.prepare(
+      "SELECT COUNT(*) as count FROM warnings WHERE guild_id = ? AND user_id = ?",
+    );
+    const result = stmt.get(guildId, userId);
+    return result ? result.count : 0;
+  },
+  clearWarnings: (guildId, userId) => {
+    const stmt = db.prepare(
+      "DELETE FROM warnings WHERE guild_id = ? AND user_id = ?",
+    );
+    const result = stmt.run(guildId, userId);
+    return result.changes;
+  },
+  removeWarning: (warningId) => {
+    const stmt = db.prepare("DELETE FROM warnings WHERE id = ?");
+    const result = stmt.run(warningId);
+    return result.changes > 0;
   },
 };
