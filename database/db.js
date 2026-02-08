@@ -172,7 +172,8 @@ module.exports = {
         welcome_channel TEXT,
         log_channel TEXT,
         level_up_channel TEXT,
-        banned_words TEXT DEFAULT '[]'
+        banned_words TEXT DEFAULT '[]',
+        auto_replies TEXT DEFAULT '{}'
       );
     `);
     createGuildConfigTable.run();
@@ -194,6 +195,15 @@ module.exports = {
     try {
       db.prepare(
         "ALTER TABLE guild_config ADD COLUMN banned_words TEXT DEFAULT '[]'",
+      ).run();
+    } catch (e) {
+      // Column already exists, ignore
+    }
+
+    // Add auto_replies column if it doesn't exist
+    try {
+      db.prepare(
+        "ALTER TABLE guild_config ADD COLUMN auto_replies TEXT DEFAULT '{}'",
       ).run();
     } catch (e) {
       // Column already exists, ignore
@@ -298,5 +308,57 @@ module.exports = {
     const stmt = db.prepare("DELETE FROM warnings WHERE id = ?");
     const result = stmt.run(warningId);
     return result.changes > 0;
+  },
+  // Auto-reply system exports
+  getAutoReplies: (guildId) => {
+    const config = getGuildConfig(guildId);
+    if (!config || !config.auto_replies) return {};
+    try {
+      return JSON.parse(config.auto_replies);
+    } catch {
+      return {};
+    }
+  },
+  addAutoReply: (guildId, trigger, response) => {
+    const config = getGuildConfig(guildId);
+    let replies = {};
+    if (config && config.auto_replies) {
+      try {
+        replies = JSON.parse(config.auto_replies);
+      } catch {
+        replies = {};
+      }
+    }
+    const normalizedTrigger = trigger.toLowerCase().trim();
+    replies[normalizedTrigger] = response;
+
+    // Ensure guild config exists
+    if (!config) {
+      db.prepare(
+        "INSERT INTO guild_config (guild_id, auto_replies) VALUES (?, ?)",
+      ).run(guildId, JSON.stringify(replies));
+    } else {
+      db.prepare(
+        "UPDATE guild_config SET auto_replies = ? WHERE guild_id = ?",
+      ).run(JSON.stringify(replies), guildId);
+    }
+    return true;
+  },
+  removeAutoReply: (guildId, trigger) => {
+    const config = getGuildConfig(guildId);
+    if (!config || !config.auto_replies) return false;
+    let replies = {};
+    try {
+      replies = JSON.parse(config.auto_replies);
+    } catch {
+      return false;
+    }
+    const normalizedTrigger = trigger.toLowerCase().trim();
+    if (!(normalizedTrigger in replies)) return false;
+    delete replies[normalizedTrigger];
+    db.prepare(
+      "UPDATE guild_config SET auto_replies = ? WHERE guild_id = ?",
+    ).run(JSON.stringify(replies), guildId);
+    return true;
   },
 };

@@ -5,6 +5,7 @@ const {
   getGuildConfig,
   addWarning,
   getWarningCount,
+  getAutoReplies,
 } = require("../database/db");
 
 // --- ANTI-SPAM CONFIGURATION ---
@@ -269,6 +270,22 @@ module.exports = {
       } catch (error) {
         // Silently fail if we can't send (permissions, etc.)
         console.error("Could not send level up message:", error.message);
+      }
+    }
+
+    // --- AUTO-REPLY SYSTEM ---
+    const autoReplies = getAutoReplies(message.guild.id);
+    const messageContent = message.content.toLowerCase().trim();
+
+    // Check if message matches any trigger
+    for (const [trigger, response] of Object.entries(autoReplies)) {
+      if (messageContent.includes(trigger)) {
+        try {
+          await message.reply(response);
+        } catch (error) {
+          console.error("Auto-reply error:", error.message);
+        }
+        break; // Only reply once per message
       }
     }
   },

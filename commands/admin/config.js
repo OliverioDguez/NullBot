@@ -11,6 +11,9 @@ const {
   getBannedWords,
   addBannedWord,
   removeBannedWord,
+  getAutoReplies,
+  addAutoReply,
+  removeAutoReply,
 } = require("../../database/db");
 
 module.exports = {
@@ -86,6 +89,40 @@ module.exports = {
         .setName("bannedwords")
         .setDescription("View the list of banned words"),
     )
+    // Auto-reply subcommands
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("autoreply")
+        .setDescription("Add an auto-reply trigger and response")
+        .addStringOption((option) =>
+          option
+            .setName("trigger")
+            .setDescription("The message that triggers the reply")
+            .setRequired(true),
+        )
+        .addStringOption((option) =>
+          option
+            .setName("response")
+            .setDescription("The bot's response")
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("removeautoreply")
+        .setDescription("Remove an auto-reply trigger")
+        .addStringOption((option) =>
+          option
+            .setName("trigger")
+            .setDescription("The trigger to remove")
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("autoreplies")
+        .setDescription("View all auto-reply triggers"),
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDMPermission(false),
 
@@ -97,6 +134,8 @@ module.exports = {
     if (subcommand === "view") {
       const config = getGuildConfig(guildId);
       const bannedWords = getBannedWords(guildId);
+      const autoReplies = getAutoReplies(guildId);
+      const replyCount = Object.keys(autoReplies).length;
 
       const embed = new EmbedBuilder()
         .setTitle("⚙️ Server Configuration")
@@ -126,6 +165,11 @@ module.exports = {
             name: "🚫 Banned Words",
             value:
               bannedWords.length > 0 ? `${bannedWords.length} word(s)` : "None",
+            inline: true,
+          },
+          {
+            name: "💬 Auto-Replies",
+            value: replyCount > 0 ? `${replyCount} trigger(s)` : "None",
             inline: true,
           },
         );
@@ -191,6 +235,66 @@ module.exports = {
       } else {
         return interaction.reply({
           content: `❌ The word ||${word.toLowerCase()}|| is not in the banned list.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+    }
+
+    // View auto-replies
+    if (subcommand === "autoreplies") {
+      const replies = getAutoReplies(guildId);
+      const triggers = Object.keys(replies);
+
+      const embed = new EmbedBuilder()
+        .setTitle("💬 Auto-Reply List")
+        .setColor("#00BFFF")
+        .setTimestamp();
+
+      if (triggers.length === 0) {
+        embed.setDescription(
+          "No auto-replies configured.\nUse `/config autoreply <trigger> <response>` to add one.",
+        );
+      } else {
+        const replyList = triggers
+          .slice(0, 15) // Limit to 15
+          .map((t) => `**"${t}"** → ${replies[t]}`)
+          .join("\n");
+        embed.setDescription(replyList);
+        if (triggers.length > 15) {
+          embed.setFooter({
+            text: `Showing 15 of ${triggers.length} triggers`,
+          });
+        } else {
+          embed.setFooter({ text: `Total: ${triggers.length} trigger(s)` });
+        }
+      }
+
+      return interaction.reply({ embeds: [embed] });
+    }
+
+    // Add auto-reply
+    if (subcommand === "autoreply") {
+      const trigger = interaction.options.getString("trigger");
+      const response = interaction.options.getString("response");
+      addAutoReply(guildId, trigger, response);
+
+      return interaction.reply({
+        content: `✅ Auto-reply added!\n**Trigger:** "${trigger.toLowerCase()}"\n**Response:** ${response}`,
+      });
+    }
+
+    // Remove auto-reply
+    if (subcommand === "removeautoreply") {
+      const trigger = interaction.options.getString("trigger");
+      const removed = removeAutoReply(guildId, trigger);
+
+      if (removed) {
+        return interaction.reply({
+          content: `✅ Removed auto-reply for trigger: "${trigger.toLowerCase()}"`,
+        });
+      } else {
+        return interaction.reply({
+          content: `❌ No auto-reply found for trigger: "${trigger.toLowerCase()}"`,
           flags: MessageFlags.Ephemeral,
         });
       }
