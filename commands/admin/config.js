@@ -5,7 +5,13 @@ const {
   ChannelType,
   MessageFlags,
 } = require("discord.js");
-const { getGuildConfig, setGuildConfig } = require("../../database/db");
+const {
+  getGuildConfig,
+  setGuildConfig,
+  getBannedWords,
+  addBannedWord,
+  removeBannedWord,
+} = require("../../database/db");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -52,6 +58,34 @@ module.exports = {
             .setRequired(true),
         ),
     )
+    // Automod subcommands
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("banword")
+        .setDescription("Add a word to the banned words list")
+        .addStringOption((option) =>
+          option
+            .setName("word")
+            .setDescription("The word to ban")
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("unbanword")
+        .setDescription("Remove a word from the banned words list")
+        .addStringOption((option) =>
+          option
+            .setName("word")
+            .setDescription("The word to unban")
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("bannedwords")
+        .setDescription("View the list of banned words"),
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDMPermission(false),
 
@@ -59,8 +93,10 @@ module.exports = {
     const subcommand = interaction.options.getSubcommand();
     const guildId = interaction.guild.id;
 
+    // View configuration
     if (subcommand === "view") {
       const config = getGuildConfig(guildId);
+      const bannedWords = getBannedWords(guildId);
 
       const embed = new EmbedBuilder()
         .setTitle("⚙️ Server Configuration")
@@ -86,10 +122,78 @@ module.exports = {
           { name: "👋 Welcome Channel", value: welcomeChannel, inline: true },
           { name: "📋 Log Channel", value: logChannel, inline: true },
           { name: "🎉 Level-Up Channel", value: levelUpChannel, inline: true },
+          {
+            name: "🚫 Banned Words",
+            value:
+              bannedWords.length > 0 ? `${bannedWords.length} word(s)` : "None",
+            inline: true,
+          },
         );
       }
 
       return interaction.reply({ embeds: [embed] });
+    }
+
+    // View banned words
+    if (subcommand === "bannedwords") {
+      const words = getBannedWords(guildId);
+
+      const embed = new EmbedBuilder()
+        .setTitle("🚫 Banned Words List")
+        .setColor("#FF0000")
+        .setTimestamp();
+
+      if (words.length === 0) {
+        embed.setDescription(
+          "No banned words configured.\nUse `/config banword <word>` to add words.",
+        );
+      } else {
+        // Show words with spoiler tags for privacy
+        const wordList = words.map((w) => `||${w}||`).join(", ");
+        embed.setDescription(wordList);
+        embed.setFooter({ text: `Total: ${words.length} word(s)` });
+      }
+
+      return interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // Add banned word
+    if (subcommand === "banword") {
+      const word = interaction.options.getString("word");
+      const added = addBannedWord(guildId, word);
+
+      if (added) {
+        return interaction.reply({
+          content: `✅ Added ||${word.toLowerCase()}|| to the banned words list.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      } else {
+        return interaction.reply({
+          content: `⚠️ The word ||${word.toLowerCase()}|| is already banned.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+    }
+
+    // Remove banned word
+    if (subcommand === "unbanword") {
+      const word = interaction.options.getString("word");
+      const removed = removeBannedWord(guildId, word);
+
+      if (removed) {
+        return interaction.reply({
+          content: `✅ Removed ||${word.toLowerCase()}|| from the banned words list.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      } else {
+        return interaction.reply({
+          content: `❌ The word ||${word.toLowerCase()}|| is not in the banned list.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
     }
 
     // Handle setting channels

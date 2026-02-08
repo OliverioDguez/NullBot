@@ -171,10 +171,20 @@ module.exports = {
         guild_id TEXT PRIMARY KEY,
         welcome_channel TEXT,
         log_channel TEXT,
-        level_up_channel TEXT
+        level_up_channel TEXT,
+        banned_words TEXT DEFAULT '[]'
       );
     `);
     createGuildConfigTable.run();
+
+    // Add banned_words column if it doesn't exist (for existing databases)
+    try {
+      db.prepare(
+        "ALTER TABLE guild_config ADD COLUMN banned_words TEXT DEFAULT '[]'",
+      ).run();
+    } catch (e) {
+      // Column already exists, ignore
+    }
 
     console.log("📊 Database tables initialized.");
   },
@@ -189,4 +199,58 @@ module.exports = {
   // Guild config exports
   getGuildConfig,
   setGuildConfig,
+  // Banned words exports
+  getBannedWords: (guildId) => {
+    const config = getGuildConfig(guildId);
+    if (!config || !config.banned_words) return [];
+    try {
+      return JSON.parse(config.banned_words);
+    } catch {
+      return [];
+    }
+  },
+  addBannedWord: (guildId, word) => {
+    const config = getGuildConfig(guildId);
+    let words = [];
+    if (config && config.banned_words) {
+      try {
+        words = JSON.parse(config.banned_words);
+      } catch {
+        words = [];
+      }
+    }
+    const normalizedWord = word.toLowerCase().trim();
+    if (words.includes(normalizedWord)) return false;
+    words.push(normalizedWord);
+
+    // Ensure guild config exists
+    if (!config) {
+      db.prepare(
+        "INSERT INTO guild_config (guild_id, banned_words) VALUES (?, ?)",
+      ).run(guildId, JSON.stringify(words));
+    } else {
+      db.prepare(
+        "UPDATE guild_config SET banned_words = ? WHERE guild_id = ?",
+      ).run(JSON.stringify(words), guildId);
+    }
+    return true;
+  },
+  removeBannedWord: (guildId, word) => {
+    const config = getGuildConfig(guildId);
+    if (!config || !config.banned_words) return false;
+    let words = [];
+    try {
+      words = JSON.parse(config.banned_words);
+    } catch {
+      return false;
+    }
+    const normalizedWord = word.toLowerCase().trim();
+    const index = words.indexOf(normalizedWord);
+    if (index === -1) return false;
+    words.splice(index, 1);
+    db.prepare(
+      "UPDATE guild_config SET banned_words = ? WHERE guild_id = ?",
+    ).run(JSON.stringify(words), guildId);
+    return true;
+  },
 };
