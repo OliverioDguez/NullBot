@@ -1,6 +1,6 @@
 # Sentinel
 
-> A modular Discord.js v14 bot with XP leveling, moderation logging, and automod.
+> A modular Discord.js v14 bot with XP leveling, moderation, automod, and anti-spam.
 
 ![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-v16.9%2B-339933?logo=nodedotjs&logoColor=white)
@@ -9,12 +9,13 @@
 ## Features
 
 - **XP Leveling System** - Users earn XP by chatting, with level-up announcements
-- **Moderation Tools** - Ban, kick, timeout, clear messages with full logging
-- **Automod** - Configurable banned words filter with automatic message deletion
-- **Moderation Logging** - Logs bans, kicks, timeouts, message edits/deletes, voice activity, and role changes
+- **Moderation Tools** - Ban, kick, timeout, warn with full logging
+- **Warning System** - Progressive discipline with auto-timeout/kick/ban
+- **Anti-Spam** - Automatic detection of message floods and duplicates
+- **Automod** - Configurable banned words filter
+- **Moderation Logging** - Logs all moderation actions, message edits/deletes, voice activity
 - **Per-Server Configuration** - Each server can configure their own channels and settings
-- **Slash Commands** - Modern Discord slash command system
-- **SQLite Database** - Persistent storage for user levels, XP, and server configs
+- **SQLite Database** - Persistent storage for user levels, XP, warnings, and configs
 
 ## Commands
 
@@ -32,14 +33,17 @@
 
 ### 🛡️ Moderation
 
-| Command      | Description                   |
-| ------------ | ----------------------------- |
-| `/ban`       | Ban a user from the server    |
-| `/unban`     | Unban a user by ID            |
-| `/kick`      | Kick a user from the server   |
-| `/timeout`   | Timeout a user for a duration |
-| `/untimeout` | Remove timeout from a user    |
-| `/clear`     | Delete messages (up to 100)   |
+| Command          | Description                    |
+| ---------------- | ------------------------------ |
+| `/ban`           | Ban a user from the server     |
+| `/unban`         | Unban a user by ID             |
+| `/kick`          | Kick a user from the server    |
+| `/timeout`       | Timeout a user for a duration  |
+| `/untimeout`     | Remove timeout from a user     |
+| `/warn`          | Warn a user for rule violation |
+| `/warnings`      | View warnings for a user       |
+| `/clearwarnings` | Clear all warnings for a user  |
+| `/clear`         | Delete messages (up to 100)    |
 
 ### 📊 Levels
 
@@ -60,11 +64,45 @@
 
 ### 🎮 Fun
 
-| Command    | Description                    |
-| ---------- | ------------------------------ |
-| `/8ball`   | Ask the magic 8ball a question |
-| `/coin`    | Flip a coin                    |
-| `/pokedex` | Look up Pokémon information    |
+| Command  | Description                    |
+| -------- | ------------------------------ |
+| `/8ball` | Ask the magic 8ball a question |
+| `/coin`  | Flip a coin                    |
+
+## Warning System
+
+Sentinel includes a progressive warning system:
+
+| Warnings | Action         |
+| -------- | -------------- |
+| 1-2      | Warning only   |
+| 3        | 1 hour timeout |
+| 5        | Automatic kick |
+| 7        | Automatic ban  |
+
+Use `/warn` to warn users and `/warnings` to view their history.
+
+## Anti-Spam
+
+Sentinel automatically detects and handles spam:
+
+| Type       | Trigger                | Action            |
+| ---------- | ---------------------- | ----------------- |
+| Duplicates | 4 same messages in 10s | Delete + Warn     |
+| Flood      | 7 messages in 5s       | Delete + Warn     |
+| Repeat     | 3+ spam warnings       | 10 minute timeout |
+
+All spam actions are logged and count toward the warning system.
+
+## Automod
+
+Configurable word filter for your server:
+
+1. Add banned words with `/config banword <word>`
+2. When someone uses a banned word:
+   - Message is automatically deleted
+   - User is notified via DM
+   - Action is logged to mod channel
 
 ## Moderation Logging
 
@@ -73,20 +111,12 @@ When configured with `/config logs #channel`, Sentinel logs:
 - 🔨 **Bans/Unbans** - With moderator and reason
 - 👢 **Kicks** - With moderator and reason
 - ⏰ **Timeouts** - With duration and reason
+- ⚠️ **Warnings** - With reason and count
+- 🚨 **Anti-Spam** - Automatic spam detection
 - 🗑️ **Message Deletes** - With original content
 - ✏️ **Message Edits** - Before and after content
 - 🔊 **Voice Activity** - Join, leave, and channel switches
 - 🎭 **Role Changes** - Roles added or removed from users
-
-## Automod
-
-Sentinel includes a configurable word filter:
-
-1. Add banned words with `/config banword <word>`
-2. When someone uses a banned word:
-   - Message is automatically deleted
-   - User is notified via DM
-   - Action is logged to mod channel
 
 ## Installation
 
@@ -141,23 +171,22 @@ Sentinel/
 │   ├── fun/          # Fun commands
 │   ├── information/  # Info commands
 │   ├── levels/       # XP/Leveling commands
-│   └── moderation/   # Mod commands
+│   └── moderation/   # Mod commands + warnings
 ├── database/
-│   └── db.js         # SQLite + XP + Config functions
+│   └── db.js         # SQLite + XP + Config + Warnings
 ├── events/
 │   ├── guildBanAdd.js       # Ban logging
 │   ├── guildBanRemove.js    # Unban logging
 │   ├── guildMemberAdd.js    # Welcome messages
 │   ├── guildMemberUpdate.js # Role change logging
 │   ├── interactionCreate.js # Command handler
-│   ├── messageCreate.js     # XP + Automod
+│   ├── messageCreate.js     # XP + Automod + Anti-spam
 │   ├── messageDelete.js     # Delete logging
 │   ├── messageUpdate.js     # Edit logging
 │   ├── voiceStateUpdate.js  # Voice logging
 │   └── ready.js
 ├── utils/
 │   └── modLog.js     # Moderation log utility
-├── config.json
 ├── deploy-commands.js
 └── index.js
 ```
