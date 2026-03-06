@@ -52,7 +52,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setColor(0x00ff00) // Green
         .setTitle("🎭 Role Added")
-        .setDescription(`**${newMember.user.tag}** received new role(s)`)
+        .setDescription(`**${newMember.user.username}** received new role(s)`)
         .addFields(
           { name: "User", value: `<@${newMember.id}>`, inline: true },
           { name: "Added By", value: `${moderator}`, inline: true },
@@ -75,7 +75,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setColor(0xff6600) // Orange
         .setTitle("🎭 Role Removed")
-        .setDescription(`**${newMember.user.tag}** lost role(s)`)
+        .setDescription(`**${newMember.user.username}** lost role(s)`)
         .addFields(
           { name: "User", value: `<@${newMember.id}>`, inline: true },
           { name: "Removed By", value: `${moderator}`, inline: true },

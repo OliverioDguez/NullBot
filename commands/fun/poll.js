@@ -1,44 +1,68 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  PermissionFlagsBits,
+} = require("discord.js");
 
 // Emoji numbers for poll options
-const POLL_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+const POLL_EMOJIS = [
+  "1️⃣",
+  "2️⃣",
+  "3️⃣",
+  "4️⃣",
+  "5️⃣",
+  "6️⃣",
+  "7️⃣",
+  "8️⃣",
+  "9️⃣",
+  "🔟",
+];
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("poll")
     .setDescription("Create a poll with up to 10 options")
     .addStringOption((option) =>
-      option.setName("question").setDescription("The poll question").setRequired(true)
+      option
+        .setName("question")
+        .setDescription("The poll question")
+        .setRequired(true),
     )
     .addStringOption((option) =>
-      option.setName("option1").setDescription("First option").setRequired(true)
+      option
+        .setName("option1")
+        .setDescription("First option")
+        .setRequired(true),
     )
     .addStringOption((option) =>
-      option.setName("option2").setDescription("Second option").setRequired(true)
+      option
+        .setName("option2")
+        .setDescription("Second option")
+        .setRequired(true),
     )
     .addStringOption((option) =>
-      option.setName("option3").setDescription("Third option (optional)")
+      option.setName("option3").setDescription("Third option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option4").setDescription("Fourth option (optional)")
+      option.setName("option4").setDescription("Fourth option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option5").setDescription("Fifth option (optional)")
+      option.setName("option5").setDescription("Fifth option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option6").setDescription("Sixth option (optional)")
+      option.setName("option6").setDescription("Sixth option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option7").setDescription("Seventh option (optional)")
+      option.setName("option7").setDescription("Seventh option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option8").setDescription("Eighth option (optional)")
+      option.setName("option8").setDescription("Eighth option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option9").setDescription("Ninth option (optional)")
+      option.setName("option9").setDescription("Ninth option (optional)"),
     )
     .addStringOption((option) =>
-      option.setName("option10").setDescription("Tenth option (optional)")
+      option.setName("option10").setDescription("Tenth option (optional)"),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .setDMPermission(false),
@@ -63,10 +87,16 @@ module.exports = {
       .setTitle("📊 " + question)
       .setDescription(description)
       .setColor(0x5865f2)
-      .setFooter({ text: "Poll by " + interaction.user.tag, iconURL: interaction.user.displayAvatarURL() })
+      .setFooter({
+        text: "Poll by " + interaction.user.username,
+        iconURL: interaction.user.displayAvatarURL(),
+      })
       .setTimestamp();
 
-    const pollMessage = await interaction.reply({ embeds: [embed], fetchReply: true });
+    const pollMessage = await interaction.reply({
+      embeds: [embed],
+      fetchReply: true,
+    });
 
     // Add reaction emojis for voting
     for (let i = 0; i < options.length; i++) {

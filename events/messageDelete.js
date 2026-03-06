@@ -25,7 +25,7 @@ module.exports = {
         {
           name: "Author",
           value: message.author
-            ? `${message.author} (${message.author.tag})`
+            ? `${message.author} (${message.author.username})`
             : "Unknown",
           inline: true,
         },

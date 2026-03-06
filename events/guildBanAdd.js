@@ -39,7 +39,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor(0xff0000) // Red
       .setTitle("🔨 User Banned")
-      .setDescription(`**${ban.user.tag}** was banned from the server`)
+      .setDescription(`**${ban.user.username}** was banned from the server`)
       .addFields(
         {
           name: "User",

@@ -25,7 +25,7 @@ module.exports = {
       .addFields(
         {
           name: "Author",
-          value: `${newMessage.author} (${newMessage.author.tag})`,
+          value: `${newMessage.author} (${newMessage.author.username})`,
           inline: true,
         },
         { name: "Channel", value: `${newMessage.channel}`, inline: true },

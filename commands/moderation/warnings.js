@@ -23,7 +23,7 @@ module.exports = {
     const warnings = getWarnings(interaction.guild.id, targetUser.id);
 
     const embed = new EmbedBuilder()
-      .setTitle(`⚠️ Warnings for ${targetUser.tag}`)
+      .setTitle(`⚠️ Warnings for ${targetUser.username}`)
       .setThumbnail(targetUser.displayAvatarURL({ size: 64 }))
       .setColor(warnings.length > 0 ? 0xffaa00 : 0x00ff00)
       .setTimestamp()

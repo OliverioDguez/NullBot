@@ -27,7 +27,11 @@ module.exports = {
         .addFields(
           { name: "Server Name", value: `${guild.name}`, inline: true },
           { name: "Server ID", value: `${guild.id}`, inline: true },
-          { name: "Server Owner", value: `${owner.user.tag}`, inline: true },
+          {
+            name: "Server Owner",
+            value: `${owner.user.username}`,
+            inline: true,
+          },
           {
             name: "Server Member Count",
             value: `${guild.memberCount}`,
@@ -49,7 +53,7 @@ module.exports = {
             name: "Roles",
             value: `${guild.roles.cache.size}`,
             inline: true,
-          }
+          },
         )
         // Check if banner exists before setting, though Discord.js handles null gracefully usually
         .setImage(guild.bannerURL({ size: 1024 }))

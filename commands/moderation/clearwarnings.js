@@ -31,7 +31,7 @@ module.exports = {
 
     if (currentCount === 0) {
       return interaction.reply({
-        content: `✅ **${targetUser.tag}** has no warnings to clear.`,
+        content: `✅ **${targetUser.username}** has no warnings to clear.`,
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -39,7 +39,7 @@ module.exports = {
     const cleared = clearWarnings(interaction.guild.id, targetUser.id);
 
     await interaction.reply(
-      `✅ Cleared **${cleared}** warning(s) from **${targetUser.tag}**.\n**Reason:** ${reason}`,
+      `✅ Cleared **${cleared}** warning(s) from **${targetUser.username}**.\n**Reason:** ${reason}`,
     );
 
     // Send mod log

@@ -68,7 +68,7 @@ module.exports = {
 
       // Send public confirmation
       await interaction.reply(
-        `👢 **${targetMember.user.tag}** has been kicked from the server.\n**Reason:** ${reason}`,
+        `👢 **${targetMember.user.username}** has been kicked from the server.\n**Reason:** ${reason}`,
       );
 
       // Send mod log

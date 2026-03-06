@@ -24,7 +24,7 @@ module.exports = {
       embed = new EmbedBuilder()
         .setColor(0x00ff00) // Green
         .setTitle("🔊 Voice Channel Join")
-        .setDescription(`**${member.user.tag}** joined a voice channel`)
+        .setDescription(`**${member.user.username}** joined a voice channel`)
         .addFields(
           { name: "User", value: `<@${member.id}>`, inline: true },
           { name: "Channel", value: `🔊 ${newChannel.name}`, inline: true },
@@ -38,7 +38,7 @@ module.exports = {
       embed = new EmbedBuilder()
         .setColor(0xff0000) // Red
         .setTitle("🔇 Voice Channel Leave")
-        .setDescription(`**${member.user.tag}** left a voice channel`)
+        .setDescription(`**${member.user.username}** left a voice channel`)
         .addFields(
           { name: "User", value: `<@${member.id}>`, inline: true },
           { name: "Channel", value: `🔊 ${oldChannel.name}`, inline: true },
@@ -52,7 +52,7 @@ module.exports = {
       embed = new EmbedBuilder()
         .setColor(0xffaa00) // Orange
         .setTitle("🔀 Voice Channel Switch")
-        .setDescription(`**${member.user.tag}** switched voice channels`)
+        .setDescription(`**${member.user.username}** switched voice channels`)
         .addFields(
           { name: "User", value: `<@${member.id}>`, inline: true },
           { name: "From", value: `🔊 ${oldChannel.name}`, inline: true },

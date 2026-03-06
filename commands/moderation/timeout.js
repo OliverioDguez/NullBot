@@ -77,7 +77,7 @@ module.exports = {
       await targetMember.timeout(durationMs, reason);
 
       await interaction.reply(
-        `✅ **${targetMember.user.tag}** has been timed out for **${minutes}** minute(s).\nReason: *${reason}*`,
+        `✅ **${targetMember.user.username}** has been timed out for **${minutes}** minute(s).\nReason: *${reason}*`,
       );
 
       // Send mod log

@@ -83,7 +83,7 @@ module.exports = {
     const warningCount = getWarningCount(interaction.guild.id, targetUser.id);
 
     // Send confirmation
-    let response = `⚠️ **${targetUser.tag}** has been warned.\n`;
+    let response = `⚠️ **${targetUser.username}** has been warned.\n`;
     response += `**Reason:** ${reason}\n`;
     response += `**Total Warnings:** ${warningCount}`;
 

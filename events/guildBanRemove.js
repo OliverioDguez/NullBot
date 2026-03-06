@@ -39,7 +39,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor(0x00ff00) // Green
       .setTitle("🔓 User Unbanned")
-      .setDescription(`**${ban.user.tag}** was unbanned from the server`)
+      .setDescription(`**${ban.user.username}** was unbanned from the server`)
       .addFields(
         {
           name: "User",

@@ -56,7 +56,7 @@ module.exports = {
       await interaction.guild.members.unban(userId, reason);
 
       await interaction.reply(
-        `✅ **${bannedUser.user.tag}** has been unbanned.\nReason: *${reason}*`,
+        `✅ **${bannedUser.user.username}** has been unbanned.\nReason: *${reason}*`,
       );
 
       // Send mod log

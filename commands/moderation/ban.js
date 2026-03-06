@@ -96,7 +96,7 @@ module.exports = {
 
       // Send public confirmation
       await interaction.reply(
-        `🔨 **${targetUser.tag}** has been banned from the server.\n**Reason:** ${reason}`,
+        `🔨 **${targetUser.username}** has been banned from the server.\n**Reason:** ${reason}`,
       );
 
       // Send mod log

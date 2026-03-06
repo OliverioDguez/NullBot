@@ -67,7 +67,7 @@ module.exports = {
       await targetMember.timeout(null, reason);
 
       await interaction.reply(
-        `✅ Timeout removed from **${targetMember.user.tag}**.\nReason: *${reason}*`,
+        `✅ Timeout removed from **${targetMember.user.username}**.\nReason: *${reason}*`,
       );
 
       // Send mod log
