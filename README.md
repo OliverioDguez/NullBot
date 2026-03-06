@@ -16,6 +16,7 @@
 - **Moderation Logging** - Logs all moderation actions, message edits/deletes, voice activity
 - **Per-Server Configuration** - Each server can configure their own channels and settings
 - **SQLite Database** - Persistent storage for user levels, XP, warnings, and configs
+- **Automatic Backups** - Daily database backups with 7-day rotation
 
 ## Commands
 
@@ -145,6 +146,7 @@ When configured with `/config logs #channel`, Nullbot logs:
    DISCORD_TOKEN=your_bot_token
    CLIENT_ID=your_client_id
    GUILD_ID=your_guild_id  # Optional: for faster dev testing
+   OWNER_ID=your_discord_user_id
    ```
 
 4. **Deploy commands and start**
@@ -190,7 +192,9 @@ Nullbot/
 │   ├── voiceStateUpdate.js  # Voice logging
 │   └── ready.js
 ├── utils/
-│   └── modLog.js     # Moderation log utility
+│   ├── modLog.js     # Moderation log utility
+│   └── backup.js     # Automatic daily DB backups
+├── backups/          # Auto-generated backup directory
 ├── deploy-commands.js
 └── index.js
 ```
