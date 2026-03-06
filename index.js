@@ -18,6 +18,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates, // Required for voice channel logs
+    GatewayIntentBits.GuildPresences, // Required for online/idle/dnd status in /stats
     GatewayIntentBits.MessageContent, // Required for XP system
   ],
 });
