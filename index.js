@@ -47,6 +47,7 @@ for (const folder of commandFolders) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
     if ("data" in command && "execute" in command) {
+      command.category = folder; // Store category for /help grouping
       client.commands.set(command.data.name, command);
       console.log(`✅ [/${command.data.name}] loaded (Category: ${folder}).`);
     } else {
