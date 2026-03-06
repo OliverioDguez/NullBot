@@ -31,25 +31,33 @@ function xpForLevel(level) {
 /**
  * Get user data from database
  */
-function getUser(userId) {
-  const stmt = db.prepare("SELECT * FROM user_levels WHERE user_id = ?");
-  return stmt.get(userId);
+function getUser(guildId, userId) {
+  const stmt = db.prepare(
+    "SELECT * FROM user_levels WHERE guild_id = ? AND user_id = ?",
+  );
+  return stmt.get(guildId, userId);
 }
 
 /**
  * Add XP to a user and return level up info if applicable
  */
-function addXP(userId) {
+function addXP(guildId, userId) {
   const now = Date.now();
-  let user = getUser(userId);
+  let user = getUser(guildId, userId);
 
   // Create user if doesn't exist
   if (!user) {
     const insert = db.prepare(
-      "INSERT INTO user_levels (user_id, xp, level, last_message_date) VALUES (?, 0, 1, 0)",
+      "INSERT INTO user_levels (guild_id, user_id, xp, level, last_message_date) VALUES (?, ?, 0, 1, 0)",
     );
-    insert.run(userId);
-    user = { user_id: userId, xp: 0, level: 1, last_message_date: null };
+    insert.run(guildId, userId);
+    user = {
+      guild_id: guildId,
+      user_id: userId,
+      xp: 0,
+      level: 1,
+      last_message_date: null,
+    };
   }
 
   // Check cooldown
@@ -66,9 +74,9 @@ function addXP(userId) {
 
   // Update database
   const update = db.prepare(
-    "UPDATE user_levels SET xp = ?, level = ?, last_message_date = ? WHERE user_id = ?",
+    "UPDATE user_levels SET xp = ?, level = ?, last_message_date = ? WHERE guild_id = ? AND user_id = ?",
   );
-  update.run(newXP, newLevel, now, userId);
+  update.run(newXP, newLevel, now, guildId, userId);
 
   // Return level up info if leveled up
   if (newLevel > oldLevel) {
@@ -81,21 +89,23 @@ function addXP(userId) {
 /**
  * Get top users for leaderboard
  */
-function getLeaderboard(limit = 10) {
-  const stmt = db.prepare("SELECT * FROM user_levels ORDER BY xp DESC LIMIT ?");
-  return stmt.all(limit);
+function getLeaderboard(guildId, limit = 10) {
+  const stmt = db.prepare(
+    "SELECT * FROM user_levels WHERE guild_id = ? ORDER BY xp DESC LIMIT ?",
+  );
+  return stmt.all(guildId, limit);
 }
 
 /**
  * Get user rank (position on leaderboard)
  */
-function getUserRank(userId) {
+function getUserRank(guildId, userId) {
   const stmt = db.prepare(`
     SELECT COUNT(*) + 1 as rank 
     FROM user_levels 
-    WHERE xp > (SELECT xp FROM user_levels WHERE user_id = ?)
+    WHERE guild_id = ? AND xp > (SELECT xp FROM user_levels WHERE guild_id = ? AND user_id = ?)
   `);
-  const result = stmt.get(userId);
+  const result = stmt.get(guildId, guildId, userId);
   return result ? result.rank : null;
 }
 
@@ -157,13 +167,43 @@ module.exports = {
   initDB: () => {
     const createUsersTable = db.prepare(`
       CREATE TABLE IF NOT EXISTS user_levels (
-        user_id TEXT PRIMARY KEY,
+        guild_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
         xp INTEGER DEFAULT 0,
         level INTEGER DEFAULT 1,
-        last_message_date INTEGER
+        last_message_date INTEGER,
+        PRIMARY KEY (guild_id, user_id)
       );
     `);
     createUsersTable.run();
+
+    // Migration: Add guild_id to existing user_levels tables that lack it
+    try {
+      const tableInfo = db.prepare("PRAGMA table_info(user_levels)").all();
+      const hasGuildId = tableInfo.some((col) => col.name === "guild_id");
+      if (!hasGuildId && tableInfo.length > 0) {
+        console.log("📦 Migrating user_levels table to per-guild schema...");
+        db.exec(`
+          ALTER TABLE user_levels RENAME TO user_levels_old;
+          CREATE TABLE user_levels (
+            guild_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            xp INTEGER DEFAULT 0,
+            level INTEGER DEFAULT 1,
+            last_message_date INTEGER,
+            PRIMARY KEY (guild_id, user_id)
+          );
+          INSERT INTO user_levels (guild_id, user_id, xp, level, last_message_date)
+            SELECT 'MIGRATE_ME', user_id, xp, level, last_message_date FROM user_levels_old;
+          DROP TABLE user_levels_old;
+        `);
+        console.log(
+          "✅ Migration complete. Note: migrated rows have guild_id='MIGRATE_ME' — update them with your actual guild ID.",
+        );
+      }
+    } catch (e) {
+      console.error("⚠️ user_levels migration error:", e.message);
+    }
 
     // Guild config table for per-server settings
     const createGuildConfigTable = db.prepare(`

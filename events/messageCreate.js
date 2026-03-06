@@ -253,7 +253,7 @@ module.exports = {
 
     // --- XP SYSTEM ---
     // Add XP to user
-    const result = addXP(message.author.id);
+    const result = addXP(message.guild.id, message.author.id);
 
     // If user leveled up, send congratulations
     if (result && result.leveledUp) {

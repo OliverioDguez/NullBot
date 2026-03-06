@@ -17,7 +17,7 @@ module.exports = {
     await interaction.deferReply();
 
     const limit = interaction.options.getInteger("limit") || 10;
-    const leaderboard = getLeaderboard(limit);
+    const leaderboard = getLeaderboard(interaction.guild.id, limit);
 
     if (leaderboard.length === 0) {
       return interaction.editReply({

@@ -16,7 +16,7 @@ module.exports = {
     await interaction.deferReply();
 
     const targetUser = interaction.options.getUser("user") || interaction.user;
-    const userData = getUser(targetUser.id);
+    const userData = getUser(interaction.guild.id, targetUser.id);
 
     if (!userData) {
       return interaction.editReply({
@@ -24,7 +24,7 @@ module.exports = {
       });
     }
 
-    const rank = getUserRank(targetUser.id);
+    const rank = getUserRank(interaction.guild.id, targetUser.id);
     const currentXP = userData.xp;
     const currentLevel = userData.level;
     const xpForCurrentLevel = xpForLevel(currentLevel);
