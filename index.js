@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { initDB } = require("./database/db");
+const { startBackupScheduler } = require("./utils/backup");
 const TOKEN = process.env.DISCORD_TOKEN;
 
 // Validate token exists
@@ -17,6 +18,7 @@ console.log("1. System starting...");
 // Note: ideally this should be awaited if using MySQL,
 // but currently it runs in the background.
 initDB();
+startBackupScheduler();
 
 const client = new Client({
   intents: [
