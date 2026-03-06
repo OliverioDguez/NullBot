@@ -41,9 +41,10 @@ module.exports = {
     }
 
     try {
-      // Check if user is actually banned
-      const banList = await interaction.guild.bans.fetch();
-      const bannedUser = banList.get(userId);
+      // Fetch only the specific user's ban (not the entire ban list)
+      const bannedUser = await interaction.guild.bans
+        .fetch(userId)
+        .catch(() => null);
 
       if (!bannedUser) {
         return interaction.reply({

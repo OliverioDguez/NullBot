@@ -44,7 +44,7 @@ for (const folder of commandFolders) {
       commands.push(command.data.toJSON());
     } else {
       console.log(
-        `⚠️ Warning: The command at ${file} (Category: ${folder}) is missing "data" or "execute".`
+        `⚠️ Warning: The command at ${file} (Category: ${folder}) is missing "data" or "execute".`,
       );
     }
   }
@@ -57,7 +57,7 @@ const rest = new REST().setToken(TOKEN);
 (async () => {
   try {
     console.log(
-      `Started refreshing ${commands.length} application (/) commands.`
+      `Started refreshing ${commands.length} application (/) commands.`,
     );
 
     // Guild Deployment
@@ -78,4 +78,3 @@ const rest = new REST().setToken(TOKEN);
     console.error(error);
   }
 })();
-// Asegúrate de que esta línea de arrib

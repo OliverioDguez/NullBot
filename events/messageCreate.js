@@ -20,7 +20,7 @@ const FLOOD_TIME_WINDOW = 5000; // 5 seconds
 const userMessageCache = new Map();
 
 // Clean up old entries every 60 seconds
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now();
   for (const [key, data] of userMessageCache.entries()) {
     // Remove entries older than 30 seconds
@@ -30,6 +30,10 @@ setInterval(() => {
     }
   }
 }, 60000);
+
+// Auto-reply cooldown tracker: Map<"guildId-trigger", lastUsedTimestamp>
+const autoReplyCooldowns = new Map();
+const AUTO_REPLY_COOLDOWN = 30000; // 30 seconds per trigger per guild
 
 module.exports = {
   name: Events.MessageCreate,
@@ -280,6 +284,12 @@ module.exports = {
     // Check if message matches any trigger
     for (const [trigger, response] of Object.entries(autoReplies)) {
       if (messageContent.includes(trigger)) {
+        // Check cooldown per trigger per guild
+        const cooldownKey = `${message.guild.id}-${trigger}`;
+        const lastUsed = autoReplyCooldowns.get(cooldownKey) || 0;
+        if (now - lastUsed < AUTO_REPLY_COOLDOWN) break; // On cooldown, skip
+
+        autoReplyCooldowns.set(cooldownKey, now);
         try {
           await message.reply(response);
         } catch (error) {

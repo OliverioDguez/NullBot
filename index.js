@@ -5,6 +5,12 @@ const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { initDB } = require("./database/db");
 const TOKEN = process.env.DISCORD_TOKEN;
 
+// Validate token exists
+if (!TOKEN) {
+  console.error("❌ Error: DISCORD_TOKEN is missing from .env file.");
+  process.exit(1);
+}
+
 console.log("1. System starting...");
 
 // Initialize DB
@@ -91,3 +97,6 @@ const shutdown = () => {
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+});
