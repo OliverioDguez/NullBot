@@ -35,4 +35,18 @@ function requireGuildAdmin(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireGuildAdmin };
+/**
+ * CSRF middleware — ensures mutating requests come from the dashboard itself
+ */
+function requireCsrf(req, res, next) {
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
+    const origin = req.get("Origin");
+    const expectedOrigin = process.env.DASHBOARD_URL || "http://localhost:3000";
+    if (origin && origin !== expectedOrigin) {
+      return res.status(403).json({ error: "CSRF Validation Failed" });
+    }
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireGuildAdmin, requireCsrf };
