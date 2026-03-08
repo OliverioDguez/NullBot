@@ -110,10 +110,15 @@ module.exports = {
       });
     } catch (error) {
       console.error(error);
-      await interaction.reply({
+      const errorReply = {
         content: "Failed to ban the user. They might not be bannable.",
         flags: MessageFlags.Ephemeral,
-      });
+      };
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(errorReply);
+      } else {
+        await interaction.reply(errorReply);
+      }
     }
   },
 };
