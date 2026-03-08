@@ -5,6 +5,16 @@
 
 let currentGuildId = null;
 
+// ---- Toast Notifications ---- //
+function showToast(message, type = "success") {
+  const container = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
 // ---- Initialization ---- //
 document.addEventListener("DOMContentLoaded", async () => {
   await loadUser();
@@ -205,6 +215,7 @@ function renderBannedWords(words) {
           method: "DELETE",
         },
       );
+      showToast("Word removed");
       loadConfig();
     });
   });
@@ -237,6 +248,7 @@ function renderAutoReplies(replies) {
           method: "DELETE",
         },
       );
+      showToast("Auto-reply removed");
       loadConfig();
     });
   });
@@ -292,6 +304,7 @@ function renderWarnings(warnings) {
       await fetch(`/api/guild/${currentGuildId}/warnings/${btn.dataset.id}`, {
         method: "DELETE",
       });
+      showToast("Warning deleted");
       loadWarnings();
     });
   });
@@ -345,6 +358,7 @@ function setupEventListeners() {
           value: e.target.value || null,
         }),
       });
+      showToast("Channel updated ✓");
     });
   });
 
@@ -362,6 +376,7 @@ function setupEventListeners() {
         body: JSON.stringify({ word }),
       });
       input.value = "";
+      showToast(`"${word}" added to banned words`);
       loadConfig();
     });
 
@@ -383,6 +398,7 @@ function setupEventListeners() {
       });
       trigger.value = "";
       response.value = "";
+      showToast("Auto-reply added ✓");
       loadConfig();
     });
 }
