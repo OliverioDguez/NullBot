@@ -69,6 +69,30 @@
   box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
 }
 
+.discord-btn svg {
+  margin-right: 0.5rem;
+}
+
+.invite-btn {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.invite-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 /* ---- Dashboard Layout ---- */
 body:has(.sidebar) {
   display: flex;
@@ -150,6 +174,44 @@ body:has(.sidebar) {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.sidebar-btn {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sidebar-btn.invite {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-btn.invite:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar-btn.logout {
+  background: rgba(237, 66, 69, 0.1);
+  color: var(--discord-red);
+  border: 1px solid rgba(237, 66, 69, 0.2);
+}
+
+.sidebar-btn.logout:hover {
+  background: rgba(237, 66, 69, 0.2);
 }
 
 .logout-btn {

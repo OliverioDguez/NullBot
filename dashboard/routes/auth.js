@@ -25,6 +25,18 @@ router.get("/login", (req, res) => {
 });
 
 /**
+ * GET /auth/invite — Redirect to Discord Bot Add URL
+ */
+router.get("/invite", (req, res) => {
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    permissions: "8", // Administrator by default (user can change when inviting)
+    scope: "bot applications.commands",
+  });
+  res.redirect(`https://discord.com/oauth2/authorize?${params}`);
+});
+
+/**
  * GET /auth/callback — Exchange code for token, fetch user data
  */
 router.get("/callback", async (req, res) => {
