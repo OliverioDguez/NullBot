@@ -5,6 +5,14 @@
 
 let currentGuildId = null;
 
+// ---- Security: HTML Escaping ---- //
+function escapeHtml(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
 // ---- Toast Notifications ---- //
 function showToast(message, type = "success") {
   const container = document.getElementById("toast-container");
@@ -58,7 +66,10 @@ async function loadGuilds() {
   }
 
   selector.innerHTML = guilds
-    .map((g) => `<option value="${g.id}">${g.name}</option>`)
+    .map(
+      (g) =>
+        `<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`,
+    )
     .join("");
 
   // Auto-select first guild
@@ -148,7 +159,7 @@ async function loadOverview() {
       <div class="rank-badge ${i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : ""}">${i + 1}</div>
       ${u.avatar ? `<img src="${u.avatar}" alt="">` : ""}
       <div class="user-details">
-        <div class="username">${u.username}</div>
+        <div class="username">${escapeHtml(u.username)}</div>
         <div class="meta">Level ${u.level} · ${u.xp.toLocaleString()} XP</div>
       </div>
     </div>
@@ -166,7 +177,10 @@ async function loadConfig() {
   const channelOptions =
     '<option value="">None</option>' +
     config.channels
-      .map((c) => `<option value="${c.id}">#${c.name}</option>`)
+      .map(
+        (c) =>
+          `<option value="${escapeHtml(c.id)}">#${escapeHtml(c.name)}</option>`,
+      )
       .join("");
 
   ["cfg-welcome", "cfg-log", "cfg-levelup"].forEach((id) => {
@@ -199,8 +213,8 @@ function renderBannedWords(words) {
     .map(
       (w) => `
     <span class="tag">
-      ${w}
-      <span class="remove-tag" data-word="${w}">✕</span>
+      ${escapeHtml(w)}
+      <span class="remove-tag" data-word="${escapeHtml(w)}">✕</span>
     </span>
   `,
     )
@@ -232,9 +246,9 @@ function renderAutoReplies(replies) {
     .map(
       ([trigger, response]) => `
     <div class="autoreply-row">
-      <span class="autoreply-trigger">"${trigger}"</span>
-      <span class="autoreply-response">→ ${response}</span>
-      <span class="remove-tag" data-trigger="${trigger}">✕</span>
+      <span class="autoreply-trigger">"${escapeHtml(trigger)}"</span>
+      <span class="autoreply-response">→ ${escapeHtml(response)}</span>
+      <span class="remove-tag" data-trigger="${escapeHtml(trigger)}">✕</span>
     </div>
   `,
     )
@@ -290,8 +304,8 @@ function renderWarnings(warnings) {
       <div class="warning-row">
         ${w.avatar ? `<img src="${w.avatar}" alt="">` : ""}
         <div class="warning-info">
-          <div class="warning-reason"><strong>${w.username}</strong> — ${w.reason || "No reason"}</div>
-          <div class="warning-meta">${date} · By <@${w.moderator_id}></div>
+          <div class="warning-reason"><strong>${escapeHtml(w.username)}</strong> — ${escapeHtml(w.reason) || "No reason"}</div>
+          <div class="warning-meta">${date} · By ${escapeHtml(w.moderator_id)}</div>
         </div>
         <button class="delete-btn" data-id="${w.id}">Delete</button>
       </div>
@@ -328,7 +342,7 @@ async function loadLeaderboard() {
       <div class="rank-badge ${u.rank === 1 ? "gold" : u.rank === 2 ? "silver" : u.rank === 3 ? "bronze" : ""}">${u.rank}</div>
       ${u.avatar ? `<img src="${u.avatar}" alt="">` : ""}
       <div class="user-details">
-        <div class="username">${u.username}</div>
+        <div class="username">${escapeHtml(u.username)}</div>
         <div class="meta">Level ${u.level} · ${u.xp.toLocaleString()} XP</div>
       </div>
       <div class="xp-bar">

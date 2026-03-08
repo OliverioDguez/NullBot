@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const crypto = require("crypto");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -10,11 +11,15 @@ const REDIRECT_URI = `${process.env.DASHBOARD_URL || "http://localhost:3000"}/au
  * GET /auth/login — Redirect to Discord OAuth2
  */
 router.get("/login", (req, res) => {
+  const state = crypto.randomBytes(16).toString("hex");
+  req.session.oauthState = state;
+
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
     response_type: "code",
     scope: "identify guilds",
+    state: state,
   });
   res.redirect(`${DISCORD_API}/oauth2/authorize?${params}`);
 });
@@ -23,8 +28,15 @@ router.get("/login", (req, res) => {
  * GET /auth/callback — Exchange code for token, fetch user data
  */
 router.get("/callback", async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
   if (!code) return res.redirect("/");
+
+  // Verify OAuth2 state
+  if (!state || state !== req.session.oauthState) {
+    console.warn("Invalid OAuth2 state detected");
+    return res.redirect("/?error=invalid_state");
+  }
+  delete req.session.oauthState;
 
   try {
     // Exchange code for token
@@ -66,7 +78,7 @@ router.get("/callback", async (req, res) => {
       discriminator: user.discriminator,
     };
     req.session.guilds = guilds;
-    req.session.accessToken = tokenData.access_token;
+    // Note: We don't store accessToken here for security to reduce exposure
 
     res.redirect("/dashboard");
   } catch (error) {

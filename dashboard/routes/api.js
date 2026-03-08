@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { requireAuth, requireGuildAdmin } = require("../middleware/auth");
+const {
+  requireAuth,
+  requireGuildAdmin,
+  requireCsrf,
+} = require("../middleware/auth");
 const {
   getGuildConfig,
   setGuildConfig,
@@ -15,6 +19,9 @@ const {
   addAutoReply,
   removeAutoReply,
 } = require("../../database/db");
+
+// Apply CSRF protection to all mutating API requests
+router.use(requireCsrf);
 
 /**
  * GET /api/guilds — List guilds where user is admin AND bot is present
@@ -252,7 +259,10 @@ router.delete(
   requireAuth,
   requireGuildAdmin,
   (req, res) => {
-    const removed = removeWarning(parseInt(req.params.warnId));
+    const removed = removeWarning(
+      req.params.guildId,
+      parseInt(req.params.warnId),
+    );
     res.json({ success: removed });
   },
 );
