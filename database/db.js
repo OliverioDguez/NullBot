@@ -344,11 +344,9 @@ module.exports = {
     const result = stmt.run(guildId, userId);
     return result.changes;
   },
-  removeWarning: (guildId, warningId) => {
-    const stmt = db.prepare(
-      "DELETE FROM warnings WHERE id = ? AND guild_id = ?",
-    );
-    const result = stmt.run(warningId, guildId);
+  removeWarning: (warningId) => {
+    const stmt = db.prepare("DELETE FROM warnings WHERE id = ?");
+    const result = stmt.run(warningId);
     return result.changes > 0;
   },
   // Auto-reply system exports
