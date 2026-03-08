@@ -4,6 +4,7 @@ const path = require("path");
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { initDB } = require("./database/db");
 const { startBackupScheduler } = require("./utils/backup");
+const { startDashboard } = require("./dashboard/server");
 const TOKEN = process.env.DISCORD_TOKEN;
 
 // Validate token exists
@@ -88,7 +89,10 @@ for (const file of eventFiles) {
 console.log("-----------------------------");
 
 // --- LOGIN ---
-client.login(TOKEN);
+client.login(TOKEN).then(() => {
+  // Start dashboard after bot is logged in
+  startDashboard(client);
+});
 
 // --- GRACEFUL SHUTDOWN ---
 const shutdown = () => {
