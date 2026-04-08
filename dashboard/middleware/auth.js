@@ -23,10 +23,10 @@ function requireGuildAdmin(req, res, next) {
       .json({ error: "You do not have access to this server" });
   }
 
-  // Check MANAGE_GUILD permission (bit 0x20)
+  // Check MANAGE_GUILD permission (bit 0x20n) or ADMINISTRATOR (0x8n)
   const hasPermission =
-    (parseInt(guild.permissions) & 0x20) === 0x20 ||
-    (parseInt(guild.permissions) & 0x8) === 0x8; // ADMINISTRATOR
+    (BigInt(guild.permissions) & 0x20n) === 0x20n ||
+    (BigInt(guild.permissions) & 0x8n) === 0x8n;
 
   if (!hasPermission) {
     return res.status(403).json({ error: "You need Manage Server permission" });

@@ -33,8 +33,8 @@ router.get("/guilds", requireAuth, (req, res) => {
   // Filter: user has Manage Server (0x20) or Administrator (0x8)
   const adminGuilds = userGuilds
     .filter((g) => {
-      const perms = parseInt(g.permissions);
-      return (perms & 0x20) === 0x20 || (perms & 0x8) === 0x8;
+      const perms = BigInt(g.permissions);
+      return (perms & 0x20n) === 0x20n || (perms & 0x8n) === 0x8n;
     })
     .map((g) => ({
       id: g.id,
