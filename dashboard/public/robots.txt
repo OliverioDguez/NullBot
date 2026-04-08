@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /auth/
+
+Sitemap: https://nullbot.net/sitemap.xml
