@@ -1,148 +1,142 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="NullBot Server Dashboard. Configure your Discord Server securely, manage warnings, and setup auto-replies." />
-    <meta name="robots" content="noindex, nofollow" /> <!-- Dashboards shouldn't be indexed since they require login -->
+    <meta name="robots" content="noindex, nofollow" />
     <title>NullBot — Dashboard</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    />
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>🛡️ NullBot</h2>
-        <select id="guild-selector" aria-label="Select server"></select>
-      </div>
-      <nav>
-        <ul>
-          <li>
-            <a href="#" data-page="overview" class="nav-link active"
-              >📊 Overview</a
-            >
-          </li>
-          <li>
-            <a href="#" data-page="config" class="nav-link">⚙️ Configuration</a>
-          </li>
-          <li>
-            <a href="#" data-page="warnings" class="nav-link">⚠️ Warnings</a>
-          </li>
-          <li>
-            <a href="#" data-page="leaderboard" class="nav-link"
-              >🏆 Leaderboard</a
-            >
-          </li>
-        </ul>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info" id="user-info"></div>
-        <div class="footer-actions">
-          <a
-            href="/auth/invite"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="sidebar-btn invite"
-            >➕ Invite Bot</a
-          >
-          <a href="/auth/logout" class="sidebar-btn logout">Logout</a>
+    <!-- Ambient Background -->
+    <div class="ambient-glow"></div>
+
+    <div class="dashboard-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <h2>🛡️ NullBot</h2>
         </div>
-      </div>
-    </aside>
+        
+        <div class="guild-picker">
+          <select id="guild-selector" aria-label="Select server"></select>
+        </div>
 
-    <!-- Main Content -->
-    <main class="dashboard-main">
-      <!-- Overview Page -->
-      <section id="page-overview" class="page active">
-        <h2>Server Overview</h2>
-        <div class="stats-grid" id="overview-stats"></div>
-        <article>
-          <header>🏆 Top 5 Members</header>
-          <div id="overview-leaderboard"></div>
-        </article>
-      </section>
+        <nav>
+          <ul class="nav-links">
+            <li>
+              <a href="#" data-page="overview" class="nav-item active">
+                <svg width="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Overview
+              </a>
+            </li>
+            <li>
+              <a href="#" data-page="config" class="nav-item">
+                <svg width="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Configuration
+              </a>
+            </li>
+            <li>
+              <a href="#" data-page="warnings" class="nav-item">
+                <svg width="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Warnings
+              </a>
+            </li>
+            <li>
+              <a href="#" data-page="leaderboard" class="nav-item">
+                <svg width="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Leaderboard
+              </a>
+            </li>
+          </ul>
+        </nav>
 
-      <!-- Configuration Page -->
-      <section id="page-config" class="page">
-        <h2>Configuration</h2>
-        <article>
-          <header>📢 Channel Settings</header>
-          <div class="grid">
-            <label
-              >Welcome Channel
-              <select id="cfg-welcome"></select>
-            </label>
-            <label
-              >Mod Log Channel
-              <select id="cfg-log"></select>
-            </label>
-            <label
-              >Level-Up Channel
+        <div class="sidebar-footer">
+          <div class="user-profile" id="user-info"></div>
+          <div class="footer-actions">
+            <a href="/auth/invite" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Invite</a>
+            <a href="/auth/logout" class="btn btn-danger">Logout</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        
+        <!-- Overview Page -->
+        <section id="page-overview" class="page active">
+          <h2 class="page-title">📊 Server Overview</h2>
+          <div class="grid-stats" id="overview-stats"></div>
+          
+          <div class="content-section">
+            <h3 class="section-header">🏆 Top 5 Members</h3>
+            <div id="overview-leaderboard" class="data-list"></div>
+          </div>
+        </section>
+
+        <!-- Configuration Page -->
+        <section id="page-config" class="page">
+          <h2 class="page-title">⚙️ Configuration</h2>
+          
+          <div class="config-grid">
+            <div class="content-section">
+              <h3 class="section-header">📢 Channel Settings</h3>
+              <label>Welcome Channel</label>
+              <select id="cfg-welcome" style="margin-bottom: 1rem;"></select>
+              
+              <label>Mod Log Channel</label>
+              <select id="cfg-log" style="margin-bottom: 1rem;"></select>
+              
+              <label>Level-Up Channel</label>
               <select id="cfg-levelup"></select>
-            </label>
+            </div>
+
+            <div class="content-section">
+              <h3 class="section-header">🚫 Banned Words</h3>
+              <div class="inline-input-group">
+                <input type="text" id="banned-word-input" placeholder="Add a word..." />
+                <button id="add-banned-word" class="btn btn-primary">Add</button>
+              </div>
+              <div id="banned-words-list" class="tag-container"></div>
+            </div>
           </div>
-        </article>
 
-        <article>
-          <header>🚫 Banned Words</header>
-          <div class="inline-form">
-            <input
-              type="text"
-              id="banned-word-input"
-              placeholder="Add a word..."
-            />
-            <button id="add-banned-word">Add</button>
+          <div class="content-section">
+            <h3 class="section-header">💬 Auto-Replies</h3>
+            <div class="inline-input-group">
+              <input type="text" id="autoreply-trigger" placeholder="Trigger..." />
+              <input type="text" id="autoreply-response" placeholder="Response..." />
+              <button id="add-autoreply" class="btn btn-primary">Add</button>
+            </div>
+            <div id="auto-replies-list" class="data-list"></div>
           </div>
-          <div id="banned-words-list" class="tag-list"></div>
-        </article>
+        </section>
 
-        <article>
-          <header>💬 Auto-Replies</header>
-          <div class="inline-form">
-            <input
-              type="text"
-              id="autoreply-trigger"
-              placeholder="Trigger..."
-            />
-            <input
-              type="text"
-              id="autoreply-response"
-              placeholder="Response..."
-            />
-            <button id="add-autoreply">Add</button>
+        <!-- Warnings Page -->
+        <section id="page-warnings" class="page">
+          <h2 class="page-title">⚠️ Warnings</h2>
+          <div class="search-wrapper">
+            <input type="search" id="warning-search" class="search-input" placeholder="Search by username..."/>
           </div>
-          <div id="auto-replies-list"></div>
-        </article>
-      </section>
+          <div class="content-section">
+            <div id="warnings-list" class="data-list"></div>
+          </div>
+        </section>
 
-      <!-- Warnings Page -->
-      <section id="page-warnings" class="page">
-        <h2>Warnings</h2>
-        <input
-          type="search"
-          id="warning-search"
-          placeholder="Search by username..."
-        />
-        <article>
-          <div id="warnings-list"></div>
-        </article>
-      </section>
+        <!-- Leaderboard Page -->
+        <section id="page-leaderboard" class="page">
+          <h2 class="page-title">🏆 Leaderboard</h2>
+          <div class="content-section">
+            <div id="leaderboard-table" class="data-list"></div>
+          </div>
+        </section>
 
-      <!-- Leaderboard Page -->
-      <section id="page-leaderboard" class="page">
-        <h2>Leaderboard</h2>
-        <article>
-          <div id="leaderboard-table"></div>
-        </article>
-      </section>
-    </main>
+      </main>
+    </div>
 
     <!-- Toast Notifications -->
-    <div class="toast-container" id="toast-container"></div>
+    <div class="toasts" id="toast-container"></div>
 
     <script src="/js/app.js"></script>
   </body>

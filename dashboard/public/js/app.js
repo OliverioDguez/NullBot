@@ -144,12 +144,12 @@ async function loadOverview() {
   lb.innerHTML = data.topUsers
     .map(
       (u, i) => `
-    <div class="leaderboard-row">
-      <div class="rank-badge ${i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : ""}">${i + 1}</div>
-      ${u.avatar ? `<img src="${u.avatar}" alt="">` : ""}
-      <div class="user-details">
-        <div class="username">${u.username}</div>
-        <div class="meta">Level ${u.level} · ${u.xp.toLocaleString()} XP</div>
+    <div class="data-row leaderboard-row">
+      <div class="rank rank-${i + 1}">${i + 1}</div>
+      ${u.avatar ? `<img class="row-avatar" src="${u.avatar}" alt="">` : `<img class="row-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">`}
+      <div class="row-details">
+        <div class="row-title">${u.username}</div>
+        <div class="row-subtitle">Level ${u.level} · ${u.xp.toLocaleString()} XP</div>
       </div>
     </div>
   `,
@@ -200,14 +200,16 @@ function renderBannedWords(words) {
       (w) => `
     <span class="tag">
       ${w}
-      <span class="remove-tag" data-word="${w}">✕</span>
+      <span class="tag-remove" data-word="${w}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+      </span>
     </span>
   `,
     )
     .join("");
 
   // Attach delete handlers
-  container.querySelectorAll(".remove-tag").forEach((btn) => {
+  container.querySelectorAll(".tag-remove").forEach((btn) => {
     btn.addEventListener("click", async () => {
       await fetch(
         `/api/guild/${currentGuildId}/banned-words/${encodeURIComponent(btn.dataset.word)}`,
@@ -231,10 +233,12 @@ function renderAutoReplies(replies) {
   container.innerHTML = entries
     .map(
       ([trigger, response]) => `
-    <div class="autoreply-row">
-      <span class="autoreply-trigger">"${trigger}"</span>
-      <span class="autoreply-response">→ ${response}</span>
-      <span class="remove-tag" data-trigger="${trigger}">✕</span>
+    <div class="data-row autoreply-row">
+      <div class="row-details flex-row">
+        <span class="row-title" style="color: var(--accent-blurple);">"${trigger}"</span>
+        <span class="row-subtitle" style="margin-top:0;">→ ${response}</span>
+      </div>
+      <button class="btn btn-danger btn-sm remove-tag" style="padding: 0.3rem 0.6rem;" data-trigger="${trigger}">Delete</button>
     </div>
   `,
     )
@@ -287,13 +291,13 @@ function renderWarnings(warnings) {
         year: "numeric",
       });
       return `
-      <div class="warning-row">
-        ${w.avatar ? `<img src="${w.avatar}" alt="">` : ""}
-        <div class="warning-info">
-          <div class="warning-reason"><strong>${w.username}</strong> — ${w.reason || "No reason"}</div>
-          <div class="warning-meta">${date} · By <@${w.moderator_id}></div>
+      <div class="data-row warning-row">
+        ${w.avatar ? `<img class="row-avatar" src="${w.avatar}" alt="">` : `<img class="row-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">`}
+        <div class="row-details">
+          <div class="row-title">${w.username} <span style="font-weight:400; opacity:0.7;">— ${w.reason || "No reason"}</span></div>
+          <div class="row-subtitle">${date} · By <@${w.moderator_id}></div>
         </div>
-        <button class="delete-btn" data-id="${w.id}">Delete</button>
+        <button class="btn btn-danger delete-btn" data-id="${w.id}">Delete</button>
       </div>
     `;
     })
@@ -324,14 +328,14 @@ async function loadLeaderboard() {
   container.innerHTML = users
     .map(
       (u) => `
-    <div class="leaderboard-row">
-      <div class="rank-badge ${u.rank === 1 ? "gold" : u.rank === 2 ? "silver" : u.rank === 3 ? "bronze" : ""}">${u.rank}</div>
-      ${u.avatar ? `<img src="${u.avatar}" alt="">` : ""}
-      <div class="user-details">
-        <div class="username">${u.username}</div>
-        <div class="meta">Level ${u.level} · ${u.xp.toLocaleString()} XP</div>
+    <div class="data-row leaderboard-row">
+      <div class="rank rank-${u.rank}">${u.rank}</div>
+      ${u.avatar ? `<img class="row-avatar" src="${u.avatar}" alt="">` : `<img class="row-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">`}
+      <div class="row-details">
+        <div class="row-title">${u.username}</div>
+        <div class="row-subtitle">Level ${u.level} · ${u.xp.toLocaleString()} XP</div>
       </div>
-      <div class="xp-bar">
+      <div class="xp-bar-container">
         <div class="xp-bar-fill" style="width: ${Math.min(100, (u.xp / (users[0]?.xp || 1)) * 100)}%"></div>
       </div>
     </div>
