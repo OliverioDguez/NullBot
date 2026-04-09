@@ -68,23 +68,27 @@ async function loadGuilds() {
   selector.addEventListener("change", (e) => {
     currentGuildId = e.target.value;
     const activePage =
-      document.querySelector(".nav-link.active")?.dataset.page || "overview";
+      document.querySelector(".nav-item.active")?.dataset.page || "overview";
     loadPage(activePage);
   });
 }
 
 // ---- Navigation ---- //
 function setupNavigation() {
-  document.querySelectorAll(".nav-link").forEach((link) => {
+  document.querySelectorAll(".nav-item").forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const page = link.dataset.page;
+      
+      // FIX: Ensure we only get the dataset.page from the actual anchor tag or its closest anchor tag
+      const anchor = e.target.closest('.nav-item');
+      if (!anchor) return;
+      const page = anchor.dataset.page;
 
       // Update active states
       document
-        .querySelectorAll(".nav-link")
+        .querySelectorAll(".nav-item")
         .forEach((l) => l.classList.remove("active"));
-      link.classList.add("active");
+      anchor.classList.add("active");
 
       document
         .querySelectorAll(".page")
