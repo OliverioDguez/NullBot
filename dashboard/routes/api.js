@@ -65,12 +65,23 @@ router.get(
     const leaderboard = getLeaderboard(guild.id, 5);
     const config = getGuildConfig(guild.id);
 
+    const statuses = { online: 0, idle: 0, dnd: 0, offline: 0 };
+    guild.members.cache.forEach((m) => {
+      const s = m.presence ? m.presence.status : "offline";
+      if (statuses.hasOwnProperty(s)) {
+        statuses[s]++;
+      } else {
+        statuses.offline++;
+      }
+    });
+
     res.json({
       name: guild.name,
       icon: guild.iconURL({ size: 128 }),
       memberCount: guild.memberCount,
       channelCount: guild.channels.cache.size,
       roleCount: guild.roles.cache.size,
+      statuses,
       topUsers: leaderboard.map((u) => {
         const member = guild.members.cache.get(u.user_id);
         return {

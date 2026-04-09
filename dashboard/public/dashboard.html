@@ -70,6 +70,17 @@
           <h2 class="page-title">📊 Server Overview</h2>
           <div class="grid-stats" id="overview-stats"></div>
           
+          <div class="grid-stats">
+            <div class="widget">
+              <h3 class="section-header" style="border:none; padding:0; margin-bottom:1rem; font-size:1.1rem;">📡 Server Status</h3>
+              <canvas id="statusChart"></canvas>
+            </div>
+            <div class="widget">
+              <h3 class="section-header" style="border:none; padding:0; margin-bottom:1rem; font-size:1.1rem;">🏆 Top XP</h3>
+              <canvas id="xpChart"></canvas>
+            </div>
+          </div>
+          
           <div class="content-section">
             <h3 class="section-header">🏆 Top 5 Members</h3>
             <div id="overview-leaderboard" class="data-list"></div>
@@ -139,6 +150,7 @@
     <!-- Toast Notifications -->
     <div class="toasts" id="toast-container"></div>
 
-    <script src="/js/app.js?v=2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/app.js?v=3"></script>
   </body>
 </html>

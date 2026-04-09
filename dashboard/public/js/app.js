@@ -4,6 +4,8 @@
  */
 
 let currentGuildId = null;
+let statusChartInstance = null;
+let xpChartInstance = null;
 
 // ---- Toast Notifications ---- //
 function showToast(message, type = "success") {
@@ -138,6 +140,62 @@ async function loadOverview() {
       <div class="stat-label">Roles</div>
     </div>
   `;
+
+  // Render Server Status Chart
+  if (statusChartInstance) statusChartInstance.destroy();
+  const ctxStatus = document.getElementById("statusChart").getContext("2d");
+  statusChartInstance = new Chart(ctxStatus, {
+    type: "doughnut",
+    data: {
+      labels: ["Online", "Idle", "Do Not Disturb", "Offline"],
+      datasets: [{
+        data: [
+          data.statuses.online || 0,
+          data.statuses.idle || 0,
+          data.statuses.dnd || 0,
+          data.statuses.offline || 0
+        ],
+        backgroundColor: ["#10b981", "#f59e0b", "#ef4444", "#64748b"],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: "75%",
+      plugins: {
+        legend: { position: "bottom", labels: { color: "#f8fafc", padding: 20 } }
+      }
+    }
+  });
+
+  // Render Top XP Chart
+  if (xpChartInstance) xpChartInstance.destroy();
+  const ctxXp = document.getElementById("xpChart").getContext("2d");
+  const topNames = data.topUsers.map(u => u.username);
+  const topXp = data.topUsers.map(u => u.xp);
+
+  xpChartInstance = new Chart(ctxXp, {
+    type: "bar",
+    data: {
+      labels: topNames,
+      datasets: [{
+        label: "XP",
+        data: topXp,
+        backgroundColor: "rgba(99, 102, 241, 0.8)",
+        borderRadius: 4,
+        hoverBackgroundColor: "rgba(6, 182, 212, 0.8)"
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { ticks: { color: "#94a3b8" }, grid: { color: "rgba(255,255,255,0.05)" } },
+        x: { ticks: { color: "#94a3b8" }, grid: { display: false } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
 
   const lb = document.getElementById("overview-leaderboard");
   if (data.topUsers.length === 0) {
