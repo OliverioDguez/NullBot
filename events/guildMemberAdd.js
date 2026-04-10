@@ -31,20 +31,29 @@ module.exports = {
       const ctx = canvas.getContext("2d");
 
       // 1. Draw Sci-Fi Gradient Background
-      // Deep Space Blue to Blurple
+      // Randomly pick a color theme for each welcome
+      const palettes = [
+        ["#0b0f19", "#1e1b4b", "#4f46e5", "#06b6d4"], // Original Indigo/Cyan
+        ["#050505", "#450a0a", "#dc2626", "#f87171"], // Crimson Red
+        ["#022c22", "#064e3b", "#10b981", "#34d399"], // Emerald Green
+        ["#2e1065", "#4c1d95", "#8b5cf6", "#c084fc"], // Amethyst Purple
+        ["#422006", "#713f12", "#eab308", "#fde047"], // Cyberpunk Gold
+      ];
+      const theme = palettes[Math.floor(Math.random() * palettes.length)];
+
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, "#0b0f19"); // Deep Space Blue
-      gradient.addColorStop(0.5, "#1e1b4b"); // Midnight Purple
-      gradient.addColorStop(1, "#4f46e5"); // Indigo / Blurple
+      gradient.addColorStop(0, theme[0]);
+      gradient.addColorStop(0.5, theme[1]);
+      gradient.addColorStop(1, theme[2]);
       
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // 2. Add some "crystal" glassmorphism polygons in the background for texture
-      ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(300, 300);
+      ctx.lineTo(400, 300);
       ctx.lineTo(0, 300);
       ctx.fill();
 
@@ -62,11 +71,11 @@ module.exports = {
       ctx.drawImage(avatar, 100, 50, 200, 200);
       ctx.restore();
 
-      // Draw a sleek glowing cyan border around the avatar
+      // Draw a sleek glowing border around the avatar matching the theme accent
       ctx.beginPath();
       ctx.arc(200, 150, 100, 0, Math.PI * 2, true);
       ctx.lineWidth = 8;
-      ctx.strokeStyle = "#06b6d4"; // Cyan
+      ctx.strokeStyle = theme[3]; // Theme Accent color
       ctx.stroke();
 
       // 4. Draw Typography
