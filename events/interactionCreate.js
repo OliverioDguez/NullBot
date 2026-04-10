@@ -4,6 +4,32 @@ module.exports = {
   name: Events.InteractionCreate,
   once: false,
   async execute(interaction) {
+    if (interaction.isButton()) {
+      if (interaction.customId.startsWith("rr_")) {
+        const roleId = interaction.customId.split("_")[1];
+        
+        try {
+          const role = interaction.guild.roles.cache.get(roleId);
+          if (!role) {
+            return interaction.reply({ content: "❌ Este rol ya no existe en el servidor.", flags: MessageFlags.Ephemeral });
+          }
+
+          const hasRole = interaction.member.roles.cache.has(roleId);
+          if (hasRole) {
+            await interaction.member.roles.remove(roleId);
+            return interaction.reply({ content: `✅ Se te ha retirado el rol **${role.name}**.`, flags: MessageFlags.Ephemeral });
+          } else {
+            await interaction.member.roles.add(roleId);
+            return interaction.reply({ content: `✅ Se te ha asignado el rol **${role.name}**.`, flags: MessageFlags.Ephemeral });
+          }
+        } catch (error) {
+          console.error("Error managing reaction role:", error);
+          return interaction.reply({ content: "⚠️ Faltan permisos para gestionar este rol o está por encima del bot.", flags: MessageFlags.Ephemeral });
+        }
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const command = interaction.client.commands.get(interaction.commandName);

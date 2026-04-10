@@ -118,6 +118,9 @@ function loadPage(page) {
     case "leaderboard":
       loadLeaderboard();
       break;
+    case "tools":
+      loadTools();
+      break;
   }
 }
 
@@ -406,6 +409,86 @@ async function loadLeaderboard() {
     .join("");
 }
 
+// ---- Tools / Generators ---- //
+let currentRoles = [];
+let buttonConfig = []; // Array of { label, style, roleId }
+
+async function loadTools() {
+  const res = await fetch(`/api/guild/${currentGuildId}/config`);
+  const config = await res.json();
+  
+  currentRoles = config.roles || [];
+  
+  // Populate channels
+  const channelSelect = document.getElementById("rr-channel");
+  channelSelect.innerHTML = config.channels
+    .map((c) => `<option value="${c.id}">#${c.name}</option>`)
+    .join("");
+
+  // Clear existing builder data when loading the page
+  buttonConfig = [];
+  renderRrButtons();
+}
+
+function renderRrButtons() {
+  const container = document.getElementById("rr-buttons-container");
+  
+  if (buttonConfig.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="padding:1rem;">No buttons added yet. Click "+ Add New Button" below.</div>';
+    return;
+  }
+
+  container.innerHTML = buttonConfig.map((btn, index) => {
+    // Role options
+    const roleOptions = currentRoles.map(r => 
+      `<option value="${r.id}" ${btn.roleId === r.id ? 'selected' : ''}>${r.name}</option>`
+    ).join("");
+
+    return `
+      <div style="display:flex; gap:1rem; align-items:flex-end; background:rgba(0,0,0,0.2); padding:1rem; border-radius:8px;">
+        <div style="flex:1">
+          <label>Button Label</label>
+          <input type="text" class="btn-label-input" data-index="${index}" value="${btn.label}" style="margin-bottom:0;" />
+        </div>
+        <div>
+          <label>Style</label>
+          <select class="btn-style-input" data-index="${index}" style="margin-bottom:0; width:120px;">
+            <option value="blue" ${btn.style === 'blue' ? 'selected' : ''}>Blue</option>
+            <option value="green" ${btn.style === 'green' ? 'selected' : ''}>Green</option>
+            <option value="red" ${btn.style === 'red' ? 'selected' : ''}>Red</option>
+            <option value="gray" ${btn.style === 'gray' ? 'selected' : ''}>Gray</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label>Assigns Role</label>
+          <select class="btn-role-input" data-index="${index}" style="margin-bottom:0;">
+            <option value="">-- Select Role --</option>
+            ${roleOptions}
+          </select>
+        </div>
+        <button class="btn btn-danger remove-rr-btn" data-index="${index}" style="height:44px; margin-bottom:0;">✕</button>
+      </div>
+    `;
+  }).join("");
+
+  // Attach dynamic event listeners for fields and remove buttons
+  container.querySelectorAll(".btn-label-input").forEach(el => 
+    el.addEventListener("change", (e) => buttonConfig[e.target.dataset.index].label = e.target.value)
+  );
+  container.querySelectorAll(".btn-style-input").forEach(el => 
+    el.addEventListener("change", (e) => buttonConfig[e.target.dataset.index].style = e.target.value)
+  );
+  container.querySelectorAll(".btn-role-input").forEach(el => 
+    el.addEventListener("change", (e) => buttonConfig[e.target.dataset.index].roleId = e.target.value)
+  );
+  container.querySelectorAll(".remove-rr-btn").forEach(el => 
+    el.addEventListener("click", (e) => {
+      buttonConfig.splice(e.target.dataset.index, 1);
+      renderRrButtons();
+    })
+  );
+}
+
 // ---- Event Listeners ---- //
 function setupEventListeners() {
   // Channel config changes
@@ -467,4 +550,46 @@ function setupEventListeners() {
       showToast("Auto-reply added ✓");
       loadConfig();
     });
+
+  // Add RR Button
+  document.getElementById("add-rr-btn").addEventListener("click", () => {
+    if (buttonConfig.length >= 5) {
+      return showToast("Discord limit: Max 5 buttons per message", "error");
+    }
+    buttonConfig.push({ label: "New Button", style: "blue", roleId: "" });
+    renderRrButtons();
+  });
+
+  // Submit RR
+  document.getElementById("submit-rr").addEventListener("click", async () => {
+    const channelId = document.getElementById("rr-channel").value;
+    const title = document.getElementById("rr-title").value.trim();
+    const description = document.getElementById("rr-description").value.trim();
+    const color = document.getElementById("rr-color").value.trim();
+
+    if (!channelId || !title) return showToast("Channel and Title are required", "error");
+    if (buttonConfig.length === 0) return showToast("Add at least one action button", "error");
+    const missingRoles = buttonConfig.some(b => !b.roleId);
+    if (missingRoles) return showToast("Every button must have an assigned role", "error");
+
+    const reqData = { channelId, title, description, color, buttons: buttonConfig };
+
+    const res = await fetch(`/api/guild/${currentGuildId}/reaction-role`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reqData)
+    });
+
+    const body = await res.json();
+    if (res.ok && body.success) {
+      showToast("Reaction Role message published! 🚀", "success");
+      // reset
+      document.getElementById("rr-title").value = "Role Assignment";
+      document.getElementById("rr-description").value = "";
+      buttonConfig = [];
+      renderRrButtons();
+    } else {
+      showToast(body.error || "Failed to publish message", "error");
+    }
+  });
 }

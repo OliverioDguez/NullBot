@@ -1,4 +1,5 @@
 const express = require("express");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const router = express.Router();
 const {
   requireAuth,
@@ -121,6 +122,12 @@ router.get(
       .map((c) => ({ id: c.id, name: c.name }))
       .sort((a, b) => a.name.localeCompare(b.name));
 
+    // Get roles for dropdowns
+    const roles = guild.roles.cache
+      .filter((r) => r.name !== "@everyone" && !r.managed)
+      .map((r) => ({ id: r.id, name: r.name, color: r.hexColor }))
+      .sort((a, b) => b.rawPosition - a.rawPosition);
+
     res.json({
       welcomeChannel: config.welcome_channel || null,
       logChannel: config.log_channel || null,
@@ -128,6 +135,7 @@ router.get(
       bannedWords,
       autoReplies,
       channels,
+      roles,
     });
   },
 );
@@ -309,6 +317,66 @@ router.get(
 
     res.json(data);
   },
+);
+
+/**
+ * POST /api/guild/:guildId/reaction-role — Dispatch visual Reaction Role Message
+ */
+router.post(
+  "/guild/:guildId/reaction-role",
+  requireAuth,
+  requireGuildAdmin,
+  async (req, res) => {
+    const client = req.app.get("discordClient");
+    const guild = client.guilds.cache.get(req.params.guildId);
+    if (!guild) return res.status(404).json({ error: "Guild not found" });
+
+    const { channelId, title, description, color, buttons } = req.body;
+    if (!channelId || !title || !buttons || buttons.length === 0) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+      const channel = guild.channels.cache.get(channelId);
+      if (!channel || channel.type !== 0) {
+        return res.status(400).json({ error: "Invalid channel" });
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(description || "Choose your roles below!")
+        .setColor(color || "#6366f1");
+
+      const components = [];
+      const row = new ActionRowBuilder();
+
+      const styleMap = {
+        blue: ButtonStyle.Primary,
+        gray: ButtonStyle.Secondary,
+        green: ButtonStyle.Success,
+        red: ButtonStyle.Danger,
+      };
+
+      buttons.forEach((btn, index) => {
+        if (index >= 5) return; // Discord max 5 buttons per row
+        
+        const b = new ButtonBuilder()
+          .setCustomId(`rr_${btn.roleId}`)
+          .setLabel(btn.label)
+          .setStyle(styleMap[btn.style] || ButtonStyle.Primary);
+        
+        row.addComponents(b);
+      });
+      
+      components.push(row);
+
+      await channel.send({ embeds: [embed], components });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error creating reaction role:", error);
+      res.status(500).json({ error: "Failed to send Reaction Role message" });
+    }
+  }
 );
 
 module.exports = router;
