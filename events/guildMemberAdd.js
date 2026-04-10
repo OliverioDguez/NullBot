@@ -71,9 +71,9 @@ module.exports = {
 
       // 4. Draw Typography
       // "WELCOME" text
-      ctx.font = "bold 48px sans-serif";
+      ctx.font = "bold 44px sans-serif";
       ctx.fillStyle = "#ffffff";
-      ctx.fillText("B I E N V E N I D O", 340, 110);
+      ctx.fillText("BIENVENIDO", 340, 110);
 
       // Username text (cut off if too long)
       const rawUsername = member.user.username;
