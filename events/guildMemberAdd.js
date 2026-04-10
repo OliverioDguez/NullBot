@@ -82,7 +82,7 @@ module.exports = {
       // "WELCOME" text
       ctx.font = "bold 44px sans-serif";
       ctx.fillStyle = "#ffffff";
-      ctx.fillText("BIENVENIDO", 340, 110);
+      ctx.fillText("WELCOME", 340, 110);
 
       // Username text (cut off if too long)
       const rawUsername = member.user.username;
@@ -95,12 +95,12 @@ module.exports = {
       // Member number
       ctx.font = "28px sans-serif";
       ctx.fillStyle = "#94a3b8"; // Slate text
-      ctx.fillText(`Eres el miembro Nº ${member.guild.memberCount}`, 340, 240);
+      ctx.fillText(`You are member #${member.guild.memberCount}`, 340, 240);
 
       // 5. Generate and Send Buffer
       const attachment = new AttachmentBuilder(canvas.toBuffer("image/png"), { name: "welcome.png" });
 
-      await channel.send({ content: `¡Agárrense, **${member.user.username}** ha llegado a la nave! 🚀`, files: [attachment] });
+      await channel.send({ content: `Buckle up, **${member.user.username}** has joined the server! 🚀`, files: [attachment] });
     } catch (error) {
       console.error(`Failed to generate and send welcome image: ${error}`);
       // Fallback to text message if canvas generation fails
