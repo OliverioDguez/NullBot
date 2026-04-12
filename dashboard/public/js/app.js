@@ -420,10 +420,13 @@ async function loadTools() {
   currentRoles = config.roles || [];
   
   // Populate channels
-  const channelSelect = document.getElementById("rr-channel");
-  channelSelect.innerHTML = config.channels
+  // Populate channels
+  const channelsHTML = config.channels
     .map((c) => `<option value="${c.id}">#${c.name}</option>`)
     .join("");
+  
+  document.getElementById("rr-channel").innerHTML = channelsHTML;
+  document.getElementById("scrim-channel").innerHTML = channelsHTML;
 
   // Clear existing builder data when loading the page
   buttonConfig = [];
@@ -590,6 +593,31 @@ function setupEventListeners() {
       renderRrButtons();
     } else {
       showToast(body.error || "Failed to publish message", "error");
+    }
+  });
+
+  // Submit Scrim
+  document.getElementById("submit-scrim").addEventListener("click", async () => {
+    const channelId = document.getElementById("scrim-channel").value;
+    const title = document.getElementById("scrim-title").value.trim();
+    const size = parseInt(document.getElementById("scrim-size").value);
+
+    if (!channelId || !title) return showToast("Channel and Title are required", "error");
+
+    const reqData = { channelId, title, size };
+
+    const res = await fetch(`/api/guild/${currentGuildId}/scrims`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reqData)
+    });
+
+    const body = await res.json();
+    if (res.ok && body.success) {
+      showToast("Scrim Lobby Queue dispatched! ⚔️", "success");
+      document.getElementById("scrim-title").value = "Valorant Competitive";
+    } else {
+      showToast(body.error || "Failed to unleash the Scrim generator", "error");
     }
   });
 }

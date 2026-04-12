@@ -379,4 +379,68 @@ router.post(
   }
 );
 
+/**
+ * POST /api/guild/:guildId/scrims — Dispatch Scrim Matchmaking Queue Message
+ */
+router.post(
+  "/guild/:guildId/scrims",
+  requireAuth,
+  requireGuildAdmin,
+  async (req, res) => {
+    const client = req.app.get("discordClient");
+    const guild = client.guilds.cache.get(req.params.guildId);
+    if (!guild) return res.status(404).json({ error: "Guild not found" });
+
+    const { channelId, title, size } = req.body;
+    if (!channelId || !title || !size) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+      const channel = guild.channels.cache.get(channelId);
+      if (!channel || channel.type !== 0) {
+        return res.status(400).json({ error: "Invalid channel" });
+      }
+
+      const maxPlayers = size * 2;
+      
+      const embed = new EmbedBuilder()
+        .setTitle(`⚔️ ${title} (${size}v${size})`)
+        .setDescription(`Click below to join the matchmaking queue!\n\n**Players (0/${maxPlayers}):**\n*No one has joined yet.*`)
+        .setColor("#ff1b51")
+        .setFooter({ text: "NullBot Component" });
+
+      const row = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId(`scrim_join`)
+            .setLabel(`Join Queue (0/${maxPlayers})`)
+            .setStyle(ButtonStyle.Success),
+          new ButtonBuilder()
+            .setCustomId(`scrim_leave`)
+            .setLabel("Leave")
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+      const msg = await channel.send({ embeds: [embed], components: [row] });
+      
+      // Save queue state into volatile memory
+      const scrimState = require("../../utils/scrimState");
+      scrimState.activeScrims.set(msg.id, {
+        channelId,
+        title,
+        teamSize: size,
+        maxPlayers,
+        players: new Set(),
+        status: "queue"
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error creating scrim:", error);
+      res.status(500).json({ error: "Failed to send Scrim message" });
+    }
+  }
+);
+
 module.exports = router;

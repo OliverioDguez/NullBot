@@ -186,6 +186,36 @@
             <button id="add-rr-btn" class="btn btn-outline" style="width:100%; margin-bottom: 2rem;">+ Add New Button (Max 5)</button>
             <button id="submit-rr" class="btn btn-primary" style="width:100%; font-size:1.1rem; padding:1rem;">🚀 Publish to Server</button>
           </div>
+
+          <!-- Scrim Matchmaker Builder -->
+          <div class="card" style="margin-top: 2rem;">
+            <h2 class="section-header">⚔️ Scrim Matchmaker Configurator</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Dispatch a competitive matchmaking queue embed to discord. When the queue is full, the bot will auto-generate isolated voice channels for both teams.</p>
+            
+            <div>
+              <label>Target Queue Channel</label>
+              <select id="scrim-channel" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:rgba(15,23,42,0.6); color:var(--text-main); font-family:var(--font-inter); padding:0.75rem 1rem; outline:none; margin-bottom:1.5rem;"></select>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+              <div>
+                <label>Game/Event Title</label>
+                <input type="text" id="scrim-title" placeholder="Valorant Competitive" value="Valorant Competitive" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:rgba(15,23,42,0.6); color:var(--text-main); font-family:var(--font-inter); padding:0.75rem 1rem; outline:none;" />
+              </div>
+              <div>
+                <label>Team Size Format</label>
+                <select id="scrim-size" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:rgba(15,23,42,0.6); color:var(--text-main); font-family:var(--font-inter); padding:0.75rem 1rem; outline:none;">
+                  <option value="1">1v1 (2 players)</option>
+                  <option value="2">2v2 (4 players)</option>
+                  <option value="3">3v3 (6 players)</option>
+                  <option value="4">4v4 (8 players)</option>
+                  <option value="5" selected>5v5 (10 players)</option>
+                </select>
+              </div>
+            </div>
+            
+            <button id="submit-scrim" class="btn btn-primary" style="width:100%; font-size:1.1rem; padding:1rem;">🕹️ Deploy Matchmaking Queue</button>
+          </div>
         </section>
 
       </main>
