@@ -391,7 +391,7 @@ router.post(
     const guild = client.guilds.cache.get(req.params.guildId);
     if (!guild) return res.status(404).json({ error: "Guild not found" });
 
-    const { channelId, title, size } = req.body;
+    const { channelId, title, size, requiredRole } = req.body;
     if (!channelId || !title || !size) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -404,9 +404,15 @@ router.post(
 
       const maxPlayers = size * 2;
       
+      let restrictionText = "";
+      if (requiredRole && requiredRole.trim() !== "") {
+        const roleEntity = guild.roles.cache.get(requiredRole);
+        if (roleEntity) restrictionText = `\n🔒 **Restricted to:** <@&${roleEntity.id}>`;
+      }
+      
       const embed = new EmbedBuilder()
         .setTitle(`⚔️ ${title} (${size}v${size})`)
-        .setDescription(`Click below to join the matchmaking queue!\n\n**Players (0/${maxPlayers}):**\n*No one has joined yet.*`)
+        .setDescription(`Click below to join the matchmaking queue!${restrictionText}\n\n**Players (0/${maxPlayers}):**\n*No one has joined yet.*`)
         .setColor("#ff1b51")
         .setFooter({ text: "NullBot Component" });
 
@@ -431,6 +437,7 @@ router.post(
         title,
         teamSize: size,
         maxPlayers,
+        requiredRole: requiredRole && requiredRole.trim() !== "" ? requiredRole : null,
         players: new Set(),
         status: "queue"
       });

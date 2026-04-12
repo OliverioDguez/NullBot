@@ -192,9 +192,17 @@
             <h2 class="section-header">⚔️ Scrim Matchmaker Configurator</h2>
             <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Dispatch a competitive matchmaking queue embed to discord. When the queue is full, the bot will auto-generate isolated voice channels for both teams.</p>
             
-            <div>
-              <label>Target Queue Channel</label>
-              <select id="scrim-channel" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:rgba(15,23,42,0.6); color:var(--text-main); font-family:var(--font-inter); padding:0.75rem 1rem; outline:none; margin-bottom:1.5rem;"></select>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+              <div>
+                <label>Target Queue Channel</label>
+                <select id="scrim-channel" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:rgba(15,23,42,0.6); color:var(--text-main); font-family:var(--font-inter); padding:0.75rem 1rem; outline:none;"></select>
+              </div>
+              <div>
+                <label>Required Role (Optional)</label>
+                <select id="scrim-req-role" style="width:100%; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:rgba(15,23,42,0.6); color:var(--text-main); font-family:var(--font-inter); padding:0.75rem 1rem; outline:none;">
+                  <option value="">Cualquiera (Sin Restricción)</option>
+                </select>
+              </div>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">

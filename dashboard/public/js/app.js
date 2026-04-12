@@ -428,6 +428,12 @@ async function loadTools() {
   document.getElementById("rr-channel").innerHTML = channelsHTML;
   document.getElementById("scrim-channel").innerHTML = channelsHTML;
 
+  // Populate Roles for Scrim Requirements
+  const rolesHTML = currentRoles
+    .map((r) => `<option value="${r.id}">${r.name}</option>`)
+    .join("");
+  document.getElementById("scrim-req-role").innerHTML = `<option value="">Cualquiera (Sin Restricción)</option>` + rolesHTML;
+
   // Clear existing builder data when loading the page
   buttonConfig = [];
   renderRrButtons();
@@ -601,10 +607,11 @@ function setupEventListeners() {
     const channelId = document.getElementById("scrim-channel").value;
     const title = document.getElementById("scrim-title").value.trim();
     const size = parseInt(document.getElementById("scrim-size").value);
+    const requiredRole = document.getElementById("scrim-req-role").value;
 
     if (!channelId || !title) return showToast("Channel and Title are required", "error");
 
-    const reqData = { channelId, title, size };
+    const reqData = { channelId, title, size, requiredRole };
 
     const res = await fetch(`/api/guild/${currentGuildId}/scrims`, {
       method: "POST",
