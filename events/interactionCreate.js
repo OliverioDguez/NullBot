@@ -35,39 +35,39 @@ module.exports = {
         if (action === "scrim_end") {
           // Require manage server
           if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            return interaction.reply({ content: "❌ Restringido a Administradores.", flags: MessageFlags.Ephemeral });
+            return interaction.reply({ content: "❌ Restricted to Administrators.", flags: MessageFlags.Ephemeral });
           }
           
           const queue = scrimState.activeScrims.get(msgId);
-          if (!queue) return interaction.reply({ content: "⚠️ Cola borrada de memoria.", flags: MessageFlags.Ephemeral });
+          if (!queue) return interaction.reply({ content: "⚠️ Queue wiped from memory.", flags: MessageFlags.Ephemeral });
 
           await interaction.deferReply({ flags: MessageFlags.Ephemeral });
           if (queue.blueChannelId) await interaction.guild.channels.cache.get(queue.blueChannelId)?.delete().catch(()=>{});
           if (queue.redChannelId) await interaction.guild.channels.cache.get(queue.redChannelId)?.delete().catch(()=>{});
           scrimState.activeScrims.delete(msgId);
 
-          const endEmbed = new EmbedBuilder().setTitle(queue.title).setDescription("🛑 Scrim terminada y canales disueltos.").setColor("#475569");
+          const endEmbed = new EmbedBuilder().setTitle(queue.title).setDescription("🛑 Scrim ended and channels dissolved.").setColor("#475569");
           await interaction.message.edit({ embeds: [endEmbed], components: [] });
-          return interaction.editReply("Canales destruidos y caché libedara.");
+          return interaction.editReply("Channels destroyed and memory freed.");
         }
 
         // --- QUEUE LOGIC ---
         const queue = scrimState.activeScrims.get(msgId);
-        if (!queue) return interaction.reply({ content: "⌛ Esta cola ya caducó o el bot se reinició.", flags: MessageFlags.Ephemeral });
+        if (!queue) return interaction.reply({ content: "⌛ This queue has expired or the bot was restarted.", flags: MessageFlags.Ephemeral });
 
-        if (queue.status !== "queue") return interaction.reply({ content: "🚫 Esta partida ya inició.", flags: MessageFlags.Ephemeral });
+        if (queue.status !== "queue") return interaction.reply({ content: "🚫 This match has already started.", flags: MessageFlags.Ephemeral });
 
         if (action === "scrim_join") {
           // Role restriction logic
           if (queue.requiredRole) {
             if (!interaction.member.roles.cache.has(queue.requiredRole)) {
-              return interaction.reply({ content: `🚫 No tienes el rol requerido (<@&${queue.requiredRole}>) para ingresar a esta cola.`, flags: MessageFlags.Ephemeral });
+              return interaction.reply({ content: `🚫 You lack the required role (<@&${queue.requiredRole}>) to join this queue.`, flags: MessageFlags.Ephemeral });
             }
           }
-          if (queue.players.has(interaction.user.id)) return interaction.reply({ content: "⚠️ Ya estás en la cola.", flags: MessageFlags.Ephemeral });
+          if (queue.players.has(interaction.user.id)) return interaction.reply({ content: "⚠️ You are already in the queue.", flags: MessageFlags.Ephemeral });
           queue.players.add(interaction.user.id);
         } else if (action === "scrim_leave") {
-          if (!queue.players.has(interaction.user.id)) return interaction.reply({ content: "⚠️ No estás en la cola.", flags: MessageFlags.Ephemeral });
+          if (!queue.players.has(interaction.user.id)) return interaction.reply({ content: "⚠️ You are not in the queue.", flags: MessageFlags.Ephemeral });
           queue.players.delete(interaction.user.id);
         }
 
@@ -102,13 +102,13 @@ module.exports = {
             ];
 
             const blueCh = await interaction.guild.channels.create({
-              name: `🛡️ Equipo Azul (${queue.title})`,
+              name: `🛡️ Blue Team (${queue.title})`,
               type: ChannelType.GuildVoice,
               permissionOverwrites: blueOverwrites
             });
 
             const redCh = await interaction.guild.channels.create({
-              name: `🗡️ Equipo Rojo (${queue.title})`,
+              name: `🗡️ Red Team (${queue.title})`,
               type: ChannelType.GuildVoice,
               permissionOverwrites: redOverwrites
             });
@@ -121,20 +121,20 @@ module.exports = {
 
             // Edit original message to show "Closed"
             const closedEmbed = new EmbedBuilder()
-              .setTitle(`⚔️ ${queue.title} (CERRADA)`)
-              .setDescription("El Matchmaking se ha completado. Revisen abajo el anuncio oficial del Lobby.")
+              .setTitle(`⚔️ ${queue.title} (CLOSED)`)
+              .setDescription("Matchmaking is complete. Check below for the official Lobby announcement.")
               .setColor("#475569");
             await interaction.message.edit({ embeds: [closedEmbed], components: [] });
 
             // Send NEW dedicated announcement
             const activeEmbed = new EmbedBuilder()
-              .setTitle(`🏆 TORNEO INICIADO: ${queue.title}`)
-              .setDescription(`¡Matchmaking completado! NullBot ha creado sus canales de voz seguros. Únanse a ellos ahora.\n\n` + 
-                `**🛡️ Equipo Azul**\n${bluePing}\n\n**🗡️ Equipo Rojo**\n${redPing}`)
+              .setTitle(`🏆 TOURNAMENT STARTED: ${queue.title}`)
+              .setDescription(`Matchmaking completed! NullBot has created your secure voice channels. Join them now.\n\n` + 
+                `**🛡️ Blue Team**\n${bluePing}\n\n**🗡️ Red Team**\n${redPing}`)
               .setColor("#10b981");
 
             const endRow = new ActionRowBuilder().addComponents(
-              new ButtonBuilder().setCustomId("scrim_end").setLabel("🛑 Terminar Match & Borrar Canales").setStyle(ButtonStyle.Danger)
+              new ButtonBuilder().setCustomId("scrim_end").setLabel("🛑 End Match & Destroy Channels").setStyle(ButtonStyle.Danger)
             );
 
             const announcementMessage = await interaction.channel.send({ content: `<@${blueTeam.join("> <@")}><@${redTeam.join("> <@")}>`, embeds: [activeEmbed], components: [endRow] });
@@ -145,29 +145,29 @@ module.exports = {
 
           } catch (e) {
             console.error(e);
-            const errEmbed = new EmbedBuilder().setTitle("Error").setDescription("Falló la creación física de canales... ¿Faltan Permisos?").setColor("#ef4444");
+            const errEmbed = new EmbedBuilder().setTitle("Error").setDescription("Failed physical channel creation... Missing Permissions?").setColor("#ef4444");
             await interaction.message.edit({ embeds: [errEmbed], components: [] });
           }
           return;
         }
 
         // Just update queue info normally if not full
-        const pingArr = Array.from(queue.players).map(id => `<@${id}>`).join("\n") || "*Nadie se ha unido aún.*";
+        const pingArr = Array.from(queue.players).map(id => `<@${id}>`).join("\n") || "*No one has joined yet.*";
         
         // Retain role restriction visually
         let restrictionText = "";
         if (queue.requiredRole) {
-          restrictionText = `\n🔒 **Restringido a:** <@&${queue.requiredRole}>`;
+          restrictionText = `\n🔒 **Restricted to:** <@&${queue.requiredRole}>`;
         }
         
         const updateEmbed = new EmbedBuilder()
           .setTitle(`⚔️ ${queue.title} (${queue.teamSize}v${queue.teamSize})`)
-          .setDescription(`Hagan click para unirse a la cola de Matchmaking.${restrictionText}\n\n**Jugadores en Cola (${queue.players.size}/${queue.maxPlayers}):**\n${pingArr}`)
+          .setDescription(`Click below to join the matchmaking queue!${restrictionText}\n\n**Players in Queue (${queue.players.size}/${queue.maxPlayers}):**\n${pingArr}`)
           .setColor("#ff1b51");
 
         const updateRow = new ActionRowBuilder().addComponents(
-          new ButtonBuilder().setCustomId("scrim_join").setLabel(`Unirse (${queue.players.size}/${queue.maxPlayers})`).setStyle(ButtonStyle.Success),
-          new ButtonBuilder().setCustomId("scrim_leave").setLabel("Salir").setStyle(ButtonStyle.Secondary)
+          new ButtonBuilder().setCustomId("scrim_join").setLabel(`Join (${queue.players.size}/${queue.maxPlayers})`).setStyle(ButtonStyle.Success),
+          new ButtonBuilder().setCustomId("scrim_leave").setLabel("Leave").setStyle(ButtonStyle.Secondary)
         );
 
         await interaction.update({ embeds: [updateEmbed], components: [updateRow] });

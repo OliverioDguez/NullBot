@@ -432,7 +432,7 @@ async function loadTools() {
   const rolesHTML = currentRoles
     .map((r) => `<option value="${r.id}">${r.name}</option>`)
     .join("");
-  document.getElementById("scrim-req-role").innerHTML = `<option value="">Cualquiera (Sin Restricción)</option>` + rolesHTML;
+  document.getElementById("scrim-req-role").innerHTML = `<option value="">Anyone (No Restriction)</option>` + rolesHTML;
 
   // Clear existing builder data when loading the page
   buttonConfig = [];
