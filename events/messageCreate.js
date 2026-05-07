@@ -255,6 +255,62 @@ module.exports = {
       }
     }
 
+    // --- NQN (Not Quite Nitro) CLONE ---
+    // Match :emoji: or ;emoji; (semicolons bypass Discord's local client autocomplete block)
+    const emojiRegex = /(?<!<a?)(:|;)([a-zA-Z0-9_]+)\1/g;
+    let newContent = message.content;
+    let hasCustomEmoji = false;
+
+    newContent = newContent.replace(emojiRegex, (match, wrapper, emojiName) => {
+      // Search for emoji globally across all guilds the bot is in, case-insensitive
+      const emoji = message.client.emojis.cache.find(e => e.name && e.name.toLowerCase() === emojiName.toLowerCase());
+      if (emoji) {
+        hasCustomEmoji = true;
+        return emoji.toString(); // <a:name:id> or <:name:id>
+      }
+      return match;
+    });
+
+    if (hasCustomEmoji) {
+      try {
+        const webhooks = await message.channel.fetchWebhooks();
+        let webhook = webhooks.find(wh => wh.owner && wh.owner.id === message.client.user.id);
+
+        if (!webhook) {
+          webhook = await message.channel.createWebhook({
+            name: "Sentinel NQN",
+            avatar: message.client.user.displayAvatarURL()
+          });
+        }
+
+        await message.delete();
+        
+        await webhook.send({
+          content: newContent,
+          username: message.member?.displayName || message.author.username,
+          avatarURL: message.author.displayAvatarURL(),
+          allowedMentions: { parse: ["users", "roles"] }
+        });
+
+        // Process XP manually for this replaced message
+        const result = addXP(message.guild.id, message.author.id);
+        if (result && result.leveledUp) {
+          const config = getGuildConfig(message.guild.id);
+          const levelUpChannel = config?.level_up_channel
+            ? message.guild.channels.cache.get(config.level_up_channel)
+            : message.channel;
+          await (levelUpChannel || message.channel).send(
+            `🎉 Congratulations ${message.author}! You've reached **Level ${result.newLevel}**!`
+          ).catch(() => {});
+        }
+
+        return; // Stop processing auto-replies, etc.
+      } catch (error) {
+        console.error("NQN Webhook error:", error.message);
+        // If webhook fails (e.g., missing permissions), it will just fall through to normal XP/auto-replies
+      }
+    }
+
     // --- XP SYSTEM ---
     // Add XP to user
     const result = addXP(message.guild.id, message.author.id);
