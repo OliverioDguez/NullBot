@@ -10,7 +10,7 @@
 
 - **Web Dashboard (SPA)** - A sleek Glassmorphism web interface driven by Express.js and Discord OAuth2 for configuring the bot in real time.
 - **Competitive Scrims Matchmaker** - Dispatch 1v1 to 5v5 Lobbies. When the queue fills, NullBot automatically splits teams, creates isolated private Voice Channels, and posts a dedicated Match Announcement.
-- **NQN Clone (Emoji Engine)** - Cross-server animated emoji spoofing via Webhooks. Users without Nitro can type `;emoji_name;` and the bot will dynamically delete and replace the message with the real animated emoji.
+- **Cross-Server Emoji Engine** - Animated emoji spoofing via Webhooks. Users without Nitro can type `;emoji_name;` and the bot will dynamically delete and replace the message with the real animated emoji.
 - **Visual Reaction Roles** - Build Reaction Role embeds dynamically from the Web Dashboard using a drag-and-drop style menu.
 - **Procedural Canvas Banners** - Generates high-quality 800x300 neon welcome images on the fly via `node-canvas`.
 - **XP Leveling System** - Users earn XP by chatting, with level-up announcements.
