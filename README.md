@@ -1,22 +1,21 @@
-# Nullbot
+# NullBot (Premium Community Server)
 
-> A modular Discord.js v14 bot with XP leveling, moderation, automod, and anti-spam.
+> The Ultimate Discord.js v14 bot tailored for E-sports, large communities, and heavy moderation. NullBot acts as a complete SaaS offering with an integrated Web Dashboard, Competitive Matchmaking, Cross-Server Emojis, and Procedural Welcome Banners.
 
 ![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-v16.9%2B-339933?logo=nodedotjs&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## Features
+## 🌟 Premium Features
 
-- **XP Leveling System** - Users earn XP by chatting, with level-up announcements
-- **Moderation Tools** - Ban, kick, timeout, warn with full logging
-- **Warning System** - Progressive discipline with auto-timeout/kick/ban
-- **Anti-Spam** - Automatic detection of message floods and duplicates
-- **Automod** - Configurable banned words filter
-- **Moderation Logging** - Logs all moderation actions, message edits/deletes, voice activity
-- **Per-Server Configuration** - Each server can configure their own channels and settings
-- **SQLite Database** - Persistent storage for user levels, XP, warnings, and configs
-- **Automatic Backups** - Daily database backups with 7-day rotation
+- **Web Dashboard (SPA)** - A sleek Glassmorphism web interface driven by Express.js and Discord OAuth2 for configuring the bot in real time.
+- **Competitive Scrims Matchmaker** - Dispatch 1v1 to 5v5 Lobbies. When the queue fills, NullBot automatically splits teams, creates isolated private Voice Channels, and posts a dedicated Match Announcement.
+- **NQN Clone (Emoji Engine)** - Cross-server animated emoji spoofing via Webhooks. Users without Nitro can type `;emoji_name;` and the bot will dynamically delete and replace the message with the real animated emoji.
+- **Visual Reaction Roles** - Build Reaction Role embeds dynamically from the Web Dashboard using a drag-and-drop style menu.
+- **Procedural Canvas Banners** - Generates high-quality 800x300 neon welcome images on the fly via `node-canvas`.
+- **XP Leveling System** - Users earn XP by chatting, with level-up announcements.
+- **Moderation & Anti-Spam** - Progressive discipline with auto-timeout/kick/ban, flood protection, and duplicate message detection.
+- **SQLite Database** - Persistent storage for user levels, warnings, and configs.
 
 ## Commands
 
